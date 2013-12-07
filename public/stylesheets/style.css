@@ -5,3 +5,18 @@ body {
 a {
   color: #00b7ff;
 }
+.game {
+  height: 600px;
+  width: 800px;
+  background: #eee;
+  border: 1px solid #000;
+}
+.game .bike {
+  position: relative;
+}
+.game .bike .bike-trail {
+  position: absolute;
+}
+.game .bike-1 .bike-trail {
+  background-color: #f00;
+}
