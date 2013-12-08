@@ -146,6 +146,7 @@ function Bike(number, pos) {
     this.currentHtmlWidth = this.defaultWidth;
     this.currentHtmlHeight = this.defaultHeight;
     this.container = null;
+    this.headHtml = null;
 
     this.turnPoints.push(pos);
 }
@@ -154,6 +155,13 @@ Bike.prototype.allocate = function(parent) {
     this.container = document.createElement("div");
     this.container.className = "bike bike-" + this.number;
     parent.appendChild(this.container);
+
+    this.headHtml = document.createElement("div");
+    this.headHtml.className = "bike-head";
+    this.container.appendChild(this.headHtml);
+
+    this.headHtml.style.left = (this.x - 1) + "px";
+    this.headHtml.style.top = (this.y - 1) + "px";
 }
 
 Bike.prototype.createHtml = function() {
@@ -194,6 +202,8 @@ Bike.prototype.move = function(stepSize) {
             this.currentHtml.style.left = this.x + "px";
             break;
     }
+    this.headHtml.style.left = (this.x - 1) + "px";
+    this.headHtml.style.top = (this.y - 1) + "px";
 }
 
 Bike.prototype.turnRight = function() {

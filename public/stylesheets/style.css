@@ -26,3 +26,10 @@ a {
 .game .bike-3 .bike-trail {
   background-color: #00f;
 }
+.game .bike .bike-head {
+  position: absolute;
+  z-index: 10;
+  width: 5px;
+  height: 5px;
+  border: 1px solid #000;
+}
