@@ -38,13 +38,8 @@ var server = http.createServer(app);
 
 var io = require('socket.io').listen(server);
 
+var gameServer = require('./game/server').GameServer(io.sockets);
 
-io.sockets.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
-});
 
 
 server.listen(app.get('port'), function(){
