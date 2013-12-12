@@ -3,7 +3,7 @@ var gameHeight = 600;
 var myBike;
 var mainLoopInterval = 100;
 var bikes = [];
-var gameContainer
+var gameContainer;
 
 var keyUp = 38;
 var keyW = 87;
@@ -18,18 +18,40 @@ var keyA = 65;
 var socket = io.connect('http://localhost');
 socket.on('state', function(data) {
     console.log(data);
-    socket.emit('my other event', {my: 'data'});
-    if (data.state == 'addBike'){
+    if (data.state === 'addBike'){
         startGame();
-        myBike = new Bike(data.number, data.pos);
+        myBike = new Bike(data.bike.number);
+        myBike.setData(data.bike);
         myBike.allocate(gameContainer);
         bikes.push(myBike);
+
+        for (var b in data.existedBikes){
+            var bikeData = data.existedBikes[b];
+            var bike = new Bike(bikeData.number);
+            bike.setData(bikeData);
+            bike.allocate(gameContainer);
+            bikes.push(bike);
+        }
+    } else if (data.state === 'update'){
+        for (var lb in bikes){
+            var localBike = bikes[lb];
+            localBike.move(10);
+            for (var b in data.bikes){
+                var bike = data.bikes[b];
+                if (bike.number === localBike.number){
+                    localBike.setData(bike);
+                }
+            }
+        }
     }
 
 });
 
 socket.on('newPlayer', function(data){
-    console.log('newPlayer', data);
+    var bike = new Bike(data.bike.number);
+    bike.setData(data.bike);
+    bike.allocate(gameContainer);
+    bikes.push(bike);
 });
 
 
@@ -42,17 +64,7 @@ function startGame() {
     body.appendChild(gameContainer);
     bindEvents(body);
 
-    var bike2 = new Bike(2, [700, 300]);
-    bike2.allocate(gameContainer);
-    bike2.direction = "l";
-    bikes.push(bike2);
-
-    var bike3 = new Bike(3, [50, 500]);
-    bike3.allocate(gameContainer);
-    bike3.direction = "u";
-    bikes.push(bike3);
-
-    window.setInterval(mainLoop, mainLoopInterval);
+    //window.setInterval(mainLoop, mainLoopInterval);
 }
 
 function mainLoop() {
@@ -73,6 +85,7 @@ function bindEvents(container) {
             case keyRight:
             case keyD:
                 myBike.turnRight();
+                socket.emit('control', {'button': 'right'});
                 break;
             case keyDown:
             case keyS:
@@ -80,10 +93,11 @@ function bindEvents(container) {
             case keyLeft:
             case keyA:
                 myBike.turnLeft();
+                socket.emit('control', {'button': 'left'});
                 break;
 
         }
-    }
+    };
 }
 
 function detectCollisions() {
