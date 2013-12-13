@@ -11,6 +11,8 @@ function Bike(number) {
     this.currentHtmlHeight = this.defaultHeight;
     this.container = null;
     this.headHtml = null;
+
+    this.onCollideCallback = null;
 }
 
 Bike.prototype.allocate = function(parent) {
@@ -55,11 +57,11 @@ Bike.prototype.move = function(stepSize) {
             break;
         case "d":
             this.y += stepSize;
-            this.currentHtmlHeight += stepSize;
+            this.currentHtmlHeight -= stepSize;
             break;
         case "l":
             this.x -= stepSize;
-            this.currentHtmlWidth += stepSize;
+            this.currentHtmlWidth -= stepSize;
             break;
     }
 
@@ -69,10 +71,24 @@ Bike.prototype.move = function(stepSize) {
 };
 
 Bike.prototype.updateHtml = function() {
-    this.currentHtml.style.width = this.currentHtmlWidth + "px";
-    this.currentHtml.style.height = this.currentHtmlHeight + "px";
-    this.currentHtml.style.left = (this.x - this.currentHtmlWidth) + "px";
-    this.currentHtml.style.top = (this.y) + "px";
+    var w = this.currentHtmlWidth;
+    var h = this.currentHtmlHeight;
+    if (w > 0){
+        this.currentHtml.style.width = w + "px";
+        this.currentHtml.style.left = (this.x - w + 5) + "px";
+    } else {
+        this.currentHtml.style.width = Math.abs(w) + 5 + "px";
+        this.currentHtml.style.left = this.x + "px";
+    }
+    if (h > 0){
+        this.currentHtml.style.height = h + "px";
+        this.currentHtml.style.top = (this.y) + "px";
+    } else {
+        this.currentHtml.style.height = (Math.abs(h) + this.defaultHeight) + "px";
+        this.currentHtml.style.top = (this.y + h) + "px";
+    }
+
+
 
     this.headHtml.style.left = (this.x - 1) + "px";
     this.headHtml.style.top = (this.y - 1) + "px";
@@ -122,8 +138,10 @@ Bike.prototype.turnLeft = function() {
 };
 
 Bike.prototype.collide = function() {
-    console.log("colliden");
     this.direction = null;
+    if (this.onCollideCallback){
+        this.onCollideCallback();
+    }
 };
 
 Bike.prototype.setData = function(data) {
@@ -135,6 +153,9 @@ Bike.prototype.setData = function(data) {
     this.currentHtmlWidth = data.currentHtmlWidth;
     this.currentHtmlHeight = data.currentHtmlHeight;
 
+    if (!this.currentHtml && (typeof document === 'object')) {
+        this.createHtml();
+    }
     if (this.currentHtml){
         this.updateHtml();
     }
@@ -150,6 +171,10 @@ Bike.prototype.getData = function() {
     data.currentHtmlWidth = this.currentHtmlWidth;
     data.currentHtmlHeight = this.currentHtmlHeight;
     return data;
+};
+
+Bike.prototype.setOnCollideCallback = function(callback){
+    this.onCollideCallback = callback;
 };
 
 if (typeof exports === 'object'){

@@ -33,13 +33,16 @@ GameServer.prototype.start = function(){
             bike.x = slot.pos[0];
             bike.y = slot.pos[1];
             bike.direction = slot.direction;
-            slot.bike = bike;
+
 
             socket.emit('state', {
                 'state': 'addBike',
                 'bike': bike.getData(),
                 'existedBikes': _this.getBikes().map(function(bike){return bike.getData()})
             });
+
+            slot.bike = bike;
+
             socket.broadcast.emit('newPlayer', {
                 'bike': bike.getData()
             });

@@ -17,19 +17,19 @@ var keyA = 65;
 
 var socket = io.connect('http://localhost');
 socket.on('state', function(data) {
-    console.log(data);
+    //console.log(data);
     if (data.state === 'addBike'){
         startGame();
         myBike = new Bike(data.bike.number);
-        myBike.setData(data.bike);
         myBike.allocate(gameContainer);
+        myBike.setData(data.bike);
         bikes.push(myBike);
 
         for (var b in data.existedBikes){
             var bikeData = data.existedBikes[b];
             var bike = new Bike(bikeData.number);
-            bike.setData(bikeData);
             bike.allocate(gameContainer);
+            bike.setData(bikeData);
             bikes.push(bike);
         }
     } else if (data.state === 'update'){
@@ -49,20 +49,24 @@ socket.on('state', function(data) {
 
 socket.on('newPlayer', function(data){
     var bike = new Bike(data.bike.number);
-    bike.setData(data.bike);
     bike.allocate(gameContainer);
+    bike.setData(data.bike);
     bikes.push(bike);
 });
 
 
 function startGame() {
-    var body = document.getElementsByTagName('body')[0];
-    gameContainer = document.createElement("div");
-    gameContainer.className = "game";
-    gameContainer.style.width = gameWidth + "px";
-    gameContainer.style.height = gameHeight + "px";
-    body.appendChild(gameContainer);
-    bindEvents(body);
+    gameContainer = document.getElementById('game-container');
+    if (!gameContainer) {
+        var body = document.getElementsByTagName('body')[0];
+        gameContainer = document.createElement("div");
+        gameContainer.className = "game";
+        gameContainer.style.width = gameWidth + "px";
+        gameContainer.style.height = gameHeight + "px";
+        gameContainer.id = "game-container";
+        body.appendChild(gameContainer);
+        bindEvents(body);
+    }
 
     //window.setInterval(mainLoop, mainLoopInterval);
 }
@@ -76,7 +80,7 @@ function mainLoop() {
 }
 
 function bindEvents(container) {
-    container.onkeypress = function(e) {
+    container.onkeydown = function(e) {
         e = e || window.event;
         switch (e.keyCode) {
             case keyUp:
