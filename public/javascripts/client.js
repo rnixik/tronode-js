@@ -15,7 +15,7 @@ var keyLeft = 37;
 var keyA = 65;
 
 
-var socket = io.connect('http://localhost');
+var socket = io.connect(document.location);
 socket.on('state', function(data) {
     //console.log(data);
     if (data.state === 'addBike'){
