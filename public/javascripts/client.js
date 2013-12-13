@@ -17,7 +17,7 @@ var keyA = 65;
 
 var socket = io.connect('http://localhost');
 socket.on('state', function(data) {
-    //console.log(data);
+    console.log(data);
     if (data.state === 'addBike'){
         startGame();
         myBike = new Bike(data.bike.number);
@@ -35,11 +35,11 @@ socket.on('state', function(data) {
     } else if (data.state === 'update'){
         for (var lb in bikes){
             var localBike = bikes[lb];
-            localBike.move(10);
             for (var b in data.bikes){
                 var bike = data.bikes[b];
                 if (bike.number === localBike.number){
                     localBike.setData(bike);
+                    localBike.move(10);
                 }
             }
         }
@@ -76,7 +76,7 @@ function mainLoop() {
         var bike = bikes[b];
         bike.move(10);
     }
-    detectCollisions();
+    //detectCollisions();
 }
 
 function bindEvents(container) {

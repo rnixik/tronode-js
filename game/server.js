@@ -59,6 +59,7 @@ GameServer.prototype.start = function(){
                 } else if (data.button === 'left') {
                     bike.turnLeft();
                 }
+                _this.updateClients();
 
             });
         }

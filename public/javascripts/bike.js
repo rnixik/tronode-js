@@ -11,6 +11,8 @@ function Bike(number) {
     this.currentHtmlHeight = this.defaultHeight;
     this.container = null;
     this.headHtml = null;
+    this.makeTurn = false;
+    this.collided = false;
 
     this.onCollideCallback = null;
 }
@@ -33,12 +35,15 @@ Bike.prototype.createHtml = function() {
     this.currentHtml.className = "bike-trail";
     this.currentHtml.style.left = this.x + "px";
     this.currentHtml.style.top = this.y + "px";
-    this.currentHtml.style.width = this.currentHtmlWidth + "px";
-    this.currentHtml.style.height = this.currentHtmlHeight + "px";
+    this.currentHtml.style.width = this.defaultWidth+ "px";
+    this.currentHtml.style.height = this.defaultHeight + "px";
     this.container.appendChild(this.currentHtml);
 };
 
 Bike.prototype.move = function(stepSize) {
+    if (this.collided){
+        return;
+    }
     if (!this.currentHtml && (typeof document === 'object')) {
         this.createHtml();
     }
@@ -46,6 +51,17 @@ Bike.prototype.move = function(stepSize) {
     if (this.turnPoints.length === 0){
         this.turnPoints.push([this.x, this.y]);
     }
+
+    if (this.makeTurn){
+        console.log('create');
+        if  (typeof document === 'object'){
+            this.createHtml();
+        }
+        this.currentHtmlWidth = this.defaultWidth;
+        this.currentHtmlHeight = this.defaultHeight;
+        this.turnPoints.push([this.x, this.y]);
+    }
+
     switch (this.direction) {
         case "u":
             this.y -= stepSize;
@@ -68,6 +84,8 @@ Bike.prototype.move = function(stepSize) {
     if (this.currentHtml){
         this.updateHtml();
     }
+
+    this.makeTurn = false;
 };
 
 Bike.prototype.updateHtml = function() {
@@ -96,10 +114,10 @@ Bike.prototype.updateHtml = function() {
 };
 
 Bike.prototype.turnRight = function() {
-    this.currentHtml = null;
-    this.currentHtmlWidth = this.defaultWidth;
-    this.currentHtmlHeight = this.defaultHeight;
-    this.turnPoints.push([this.x, this.y]);
+    if (this.collided){
+        return;
+    }
+
     switch (this.direction) {
         case "r":
             this.direction = "d";
@@ -114,13 +132,13 @@ Bike.prototype.turnRight = function() {
             this.direction = "r";
             break;
     }
+    this.makeTurn = true;
 };
 
 Bike.prototype.turnLeft = function() {
-    this.currentHtml = null;
-    this.currentHtmlWidth = this.defaultWidth;
-    this.currentHtmlHeight = this.defaultHeight;
-    this.turnPoints.push([this.x, this.y]);
+    if (this.collided){
+        return;
+    }
     switch (this.direction) {
         case "r":
             this.direction = "u";
@@ -135,12 +153,14 @@ Bike.prototype.turnLeft = function() {
             this.direction = "l";
             break;
     }
+    this.makeTurn = true;
 };
 
 Bike.prototype.collide = function() {
     this.direction = null;
+    this.collided = true;
     if (this.onCollideCallback){
-        this.onCollideCallback();
+        this.onCollideCallback(this);
     }
 };
 
@@ -159,6 +179,8 @@ Bike.prototype.setData = function(data) {
     if (this.currentHtml){
         this.updateHtml();
     }
+
+    this.makeTurn = data.makeTurn;
 };
 
 Bike.prototype.getData = function() {
@@ -170,6 +192,7 @@ Bike.prototype.getData = function() {
     data.turnPoints = this.turnPoints;
     data.currentHtmlWidth = this.currentHtmlWidth;
     data.currentHtmlHeight = this.currentHtmlHeight;
+    data.makeTurn = this.makeTurn;
     return data;
 };
 
