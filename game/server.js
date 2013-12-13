@@ -7,12 +7,13 @@ function GameServer(sockets){
 
     this.gameStarted = false;
 
-    this.slots = [
-    {"id": 1, "pos": [50, 50], "direction": "r", "socketId": null, 'bike': null},
-    {"id": 2, "pos": [750, 100], "direction": "d", "socketId": null, 'bike': null},
-    {"id": 3, "pos": [700, 550], "direction": "l", "socketId": null, 'bike': null},
-    {"id": 4, "pos": [100, 550], "direction": "u", "socketId": null, 'bike': null}
+    this.initialSlots = [
+    {"id": 1, "pos": [50, 50], "direction": "r"},
+    {"id": 2, "pos": [750, 100], "direction": "d"},
+    {"id": 3, "pos": [700, 550], "direction": "l"},
+    {"id": 4, "pos": [100, 550], "direction": "u"}
     ];
+    this.slots = [];
 }
 
 GameServer.prototype.getNextFreeSlot = function(){
@@ -24,10 +25,36 @@ GameServer.prototype.getNextFreeSlot = function(){
 };
 
 GameServer.prototype.start = function(){
-    var bikeModule = require('./../public/javascripts/bike.js');
+
     this.sockets.on('connection', function (socket) {
-        var slot = _this.getNextFreeSlot();
-        if (slot){
+
+        socket.on('control', function(data){
+            if (data.button === 'join') {
+                var slot = _this.getNextFreeSlot();
+                if (slot) {
+                    _this.initializePlayer(slot, socket, data.name);
+                }
+                _this.gameStarted = true;
+            }
+        });
+
+        socket.emit('state', {
+            'state': 'connected',
+            'existedBikes': _this.getBikes().map(function(bike){return bike.getData();})
+        });
+
+
+    });
+
+    this.resetSlots();
+
+    setInterval(function(){
+        _this.mainLoop();
+    }, 100);
+};
+
+GameServer.prototype.initializePlayer = function(slot, socket, name) {
+    var bikeModule = require('./../public/javascripts/bike.js');
             slot.socketId = socket.id;
             var bike = new bikeModule.Bike(slot.id, slot.pos);
             bike.x = slot.pos[0];
@@ -38,8 +65,7 @@ GameServer.prototype.start = function(){
 
             socket.emit('state', {
                 'state': 'addBike',
-                'bike': bike.getData(),
-                'existedBikes': _this.getBikes().map(function(bike){return bike.getData()})
+                'bike': bike.getData()
             });
 
             slot.bike = bike;
@@ -55,35 +81,30 @@ GameServer.prototype.start = function(){
 
             socket.on('control', function(data){
                 var bike = _this.getBikeBySocketId(socket.id);
-                if (data.button === 'right'){
+                if (bike && data.button === 'right'){
                     bike.turnRight();
                     _this.updateClients();
-                } else if (data.button === 'left') {
+                } else if (bike && data.button === 'left') {
                     bike.turnLeft();
                     _this.updateClients();
-                } else if (data.button === 'ready') {
-                    _this.gameStarted = true;
                 }
-
-
             });
-        }
+};
 
-    });
-
-    setInterval(function(){
-        _this.mainLoop();
-    }, 100);
+GameServer.prototype.resetSlots = function(){
+    this.slots = [];
+    for (var is in this.initialSlots){
+        var islot = this.initialSlots[is];
+        var slotData = islot;
+        slotData['scoketId'] = null;
+        slotData['bike'] = null;
+        this.slots.push(slotData);
+    }
 };
 
 GameServer.prototype.onBikeCollided = function(bike){
     _this.gameStarted = false;
-    this.slots = [
-    {"id": 1, "pos": [50, 50], "direction": "r", "socketId": null, 'bike': null},
-    {"id": 2, "pos": [750, 100], "direction": "d", "socketId": null, 'bike': null},
-    {"id": 3, "pos": [700, 550], "direction": "l", "socketId": null, 'bike': null},
-    {"id": 4, "pos": [100, 550], "direction": "u", "socketId": null, 'bike': null}
-    ];
+    _this.resetSlots();
 };
 
 GameServer.prototype.getBikeBySocketId = function(socketId) {

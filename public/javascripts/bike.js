@@ -13,6 +13,7 @@ function Bike(number) {
     this.headHtml = null;
     this.makeTurn = false;
     this.collided = false;
+    this.name = "";
 
     this.onCollideCallback = null;
 }
@@ -180,6 +181,7 @@ Bike.prototype.setData = function(data) {
     }
 
     this.makeTurn = data.makeTurn;
+    this.name = data.name;
 };
 
 Bike.prototype.getData = function() {
@@ -192,6 +194,7 @@ Bike.prototype.getData = function() {
     data.currentHtmlWidth = this.currentHtmlWidth;
     data.currentHtmlHeight = this.currentHtmlHeight;
     data.makeTurn = this.makeTurn;
+    data.name = this.name;
     return data;
 };
 
