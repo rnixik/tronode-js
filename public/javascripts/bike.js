@@ -53,7 +53,6 @@ Bike.prototype.move = function(stepSize) {
     }
 
     if (this.makeTurn){
-        console.log('create');
         if  (typeof document === 'object'){
             this.createHtml();
         }

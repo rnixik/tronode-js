@@ -5,9 +5,9 @@ function GameServer(sockets){
     this.gameWidth = 800;
     this.gameHeight = 600;
 
-    this.slots = [
-    {"id": 5, "pos": [440, 400], "direction": "r", "socketId": null, 'bike': null},
+    this.gameStarted = false;
 
+    this.slots = [
     {"id": 1, "pos": [50, 50], "direction": "r", "socketId": null, 'bike': null},
     {"id": 2, "pos": [750, 100], "direction": "d", "socketId": null, 'bike': null},
     {"id": 3, "pos": [700, 550], "direction": "l", "socketId": null, 'bike': null},
@@ -33,6 +33,7 @@ GameServer.prototype.start = function(){
             bike.x = slot.pos[0];
             bike.y = slot.pos[1];
             bike.direction = slot.direction;
+            bike.setOnCollideCallback(_this.onBikeCollided);
 
 
             socket.emit('state', {
@@ -56,10 +57,14 @@ GameServer.prototype.start = function(){
                 var bike = _this.getBikeBySocketId(socket.id);
                 if (data.button === 'right'){
                     bike.turnRight();
+                    _this.updateClients();
                 } else if (data.button === 'left') {
                     bike.turnLeft();
+                    _this.updateClients();
+                } else if (data.button === 'ready') {
+                    _this.gameStarted = true;
                 }
-                _this.updateClients();
+
 
             });
         }
@@ -69,6 +74,16 @@ GameServer.prototype.start = function(){
     setInterval(function(){
         _this.mainLoop();
     }, 100);
+};
+
+GameServer.prototype.onBikeCollided = function(bike){
+    _this.gameStarted = false;
+    this.slots = [
+    {"id": 1, "pos": [50, 50], "direction": "r", "socketId": null, 'bike': null},
+    {"id": 2, "pos": [750, 100], "direction": "d", "socketId": null, 'bike': null},
+    {"id": 3, "pos": [700, 550], "direction": "l", "socketId": null, 'bike': null},
+    {"id": 4, "pos": [100, 550], "direction": "u", "socketId": null, 'bike': null}
+    ];
 };
 
 GameServer.prototype.getBikeBySocketId = function(socketId) {
@@ -92,6 +107,9 @@ GameServer.prototype.getBikes = function() {
 };
 
 GameServer.prototype.mainLoop = function() {
+    if (!this.gameStarted){
+        return;
+    }
     var bikes = this.getBikes();
     for (var b in bikes) {
         var bike = bikes[b];

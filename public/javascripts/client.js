@@ -17,7 +17,7 @@ var keyA = 65;
 
 var socket = io.connect('http://localhost');
 socket.on('state', function(data) {
-    console.log(data);
+    //console.log(data);
     if (data.state === 'addBike'){
         startGame();
         myBike = new Bike(data.bike.number);
@@ -66,6 +66,13 @@ function startGame() {
         gameContainer.id = "game-container";
         body.appendChild(gameContainer);
         bindEvents(body);
+
+        var readyBtn = document.createElement("button");
+        readyBtn.innerHTML = "Ready";
+        body.appendChild(readyBtn);
+        readyBtn.onclick = function(){
+            socket.emit('control', {'button': 'ready'});
+        };
     }
 
     //window.setInterval(mainLoop, mainLoopInterval);
