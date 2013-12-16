@@ -2,10 +2,13 @@ function GameServer(sockets){
     this.sockets = sockets;
     _this = this;
 
+    this.mainLoopInterval = 100;
+
     this.gameWidth = 800;
     this.gameHeight = 600;
 
     this.gameStarted = false;
+    this.gameTime = 0;
 
     this.initialSlots = [
     {"id": 1, "pos": [50, 50], "direction": "r"},
@@ -29,12 +32,23 @@ GameServer.prototype.start = function(){
     this.sockets.on('connection', function (socket) {
 
         socket.on('control', function(data){
-            if (data.button === 'join') {
+            var bike = _this.getBikeBySocketId(socket.id);
+            if (!bike && data.button === 'join') {
                 var slot = _this.getNextFreeSlot();
                 if (slot) {
                     _this.initializePlayer(slot, socket, data.name);
                 }
-                _this.gameStarted = true;
+            } else if (bike) {
+                if (data.button === 'right') {
+                    bike.turnRight();
+                    _this.updateClients();
+                } else if (data.button === 'left') {
+                    bike.turnLeft();
+                    _this.updateClients();
+                } else if (data.button === 'start') {
+                    _this.gameStarted = true;
+                    _this.updateClients();
+                }
             }
         });
 
@@ -43,14 +57,20 @@ GameServer.prototype.start = function(){
             'existedBikes': _this.getBikes().map(function(bike){return bike.getData();})
         });
 
-
+        socket.on('disconnect', function(){
+            var slot = _this.getSlotBySocketId(socket.id);
+            if (slot){
+                slot.socketId = null;
+                slot.bike = null;
+            }
+        });
     });
 
     this.resetSlots();
 
     setInterval(function(){
         _this.mainLoop();
-    }, 100);
+    }, _this.mainLoopInterval);
 };
 
 GameServer.prototype.initializePlayer = function(slot, socket, name) {
@@ -60,6 +80,7 @@ GameServer.prototype.initializePlayer = function(slot, socket, name) {
             bike.x = slot.pos[0];
             bike.y = slot.pos[1];
             bike.direction = slot.direction;
+            bike.name = _this.removeTags(name);
             bike.setOnCollideCallback(_this.onBikeCollided);
 
 
@@ -70,41 +91,51 @@ GameServer.prototype.initializePlayer = function(slot, socket, name) {
 
             slot.bike = bike;
 
-            socket.broadcast.emit('newPlayer', {
+            socket.broadcast.emit('state', {
+                'state': 'newPlayer',
                 'bike': bike.getData()
             });
 
-            socket.on('disconnect', function(){
-                slot.socketId = null;
-                slot.bike = null;
-            });
 
-            socket.on('control', function(data){
-                var bike = _this.getBikeBySocketId(socket.id);
-                if (bike && data.button === 'right'){
-                    bike.turnRight();
-                    _this.updateClients();
-                } else if (bike && data.button === 'left') {
-                    bike.turnLeft();
-                    _this.updateClients();
-                }
-            });
 };
 
 GameServer.prototype.resetSlots = function(){
     this.slots = [];
     for (var is in this.initialSlots){
         var islot = this.initialSlots[is];
-        var slotData = islot;
-        slotData['scoketId'] = null;
+        var slotData = {};
+        slotData['id'] = islot.id;
+        slotData['pos'] = islot.pos;
+        slotData['direction'] = islot.direction;
+        slotData['socketId'] = null;
         slotData['bike'] = null;
         this.slots.push(slotData);
     }
 };
 
-GameServer.prototype.onBikeCollided = function(bike){
+GameServer.prototype.endGame = function(winnerBike){
     _this.gameStarted = false;
+    _this.sockets.emit('state', {
+        'state': 'endGame',
+        'winnerBike': winnerBike.getData(),
+        'time': _this.gameTime
+    });
+    _this.gameTime = 0;
     _this.resetSlots();
+};
+
+GameServer.prototype.onBikeCollided = function(bike){
+    var last = true;
+    for (var s in this.slots) {
+        var slot = this.slots[s];
+        if (slot.bike && !slot.bike.collided) {
+            last = false;
+        }
+    }
+    if (last){
+        _this.endGame(bike);
+    }
+
 };
 
 GameServer.prototype.getBikeBySocketId = function(socketId) {
@@ -112,6 +143,15 @@ GameServer.prototype.getBikeBySocketId = function(socketId) {
         var slot = this.slots[s];
         if (slot.socketId === socketId) {
             return slot.bike;
+        }
+    }
+};
+
+GameServer.prototype.getSlotBySocketId = function(socketId) {
+    for (var s in this.slots) {
+        var slot = this.slots[s];
+        if (slot.socketId === socketId) {
+            return slot;
         }
     }
 };
@@ -137,6 +177,7 @@ GameServer.prototype.mainLoop = function() {
         bike.move(10);
     }
     this.detectCollisions();
+    _this.gameTime += _this.mainLoopInterval;
     this.updateClients();
 };
 
@@ -207,6 +248,30 @@ GameServer.prototype.detectCollisions = function() {
             }
         }
     }
+};
+
+var tagBody = '(?:[^"\'>]|"[^"]*"|\'[^\']*\')*';
+
+var tagOrComment = new RegExp(
+    '<(?:'
+    // Comment body.
+    + '!--(?:(?:-*[^->])*--+|-?)'
+    // Special "raw text" elements whose content should be elided.
+    + '|script\\b' + tagBody + '>[\\s\\S]*?</script\\s*'
+    + '|style\\b' + tagBody + '>[\\s\\S]*?</style\\s*'
+    // Regular name
+    + '|/?[a-z]'
+    + tagBody
+    + ')>',
+    'gi');
+
+GameServer.prototype.removeTags = function(html) {
+  var oldHtml;
+  do {
+    oldHtml = html;
+    html = html.replace(tagOrComment, '');
+  } while (html !== oldHtml);
+  return html.replace(/</g, '&lt;');
 };
 
 exports.GameServer = GameServer;
