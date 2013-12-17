@@ -65,11 +65,19 @@ socket.on('state', function(data) {
         bike.allocate(gameContainer);
         bike.setData(data.bike);
         bikes.push(bike);
+    } else if (data.state === 'update-rooms'){
+        updateRoomsList(data.rooms);
     }
 
 });
 
-
+function updateRoomsList(rooms) {
+    console.log(rooms);
+    var roomTpl = document.getElementById('room-tpl').innerHTML;
+    var container = document.getElementById('rooms');
+    var template = new EJS({text: roomTpl});
+    container.innerHTML = template.render({'rooms': rooms});
+}
 
 function startGame() {
     gameContainer = document.getElementById('game-container');
@@ -84,6 +92,24 @@ function startGame() {
             document.getElementById('start-btn').style.display = 'none';
         }
     };
+
+    document.getElementById('join-room-btn').onclick = joinRoom;
+    document.getElementById('create-room-btn').onclick = createRoom;
+}
+
+function joinRoom(){
+    var roomId = document.querySelector('.room-option:checked').value;
+    if (roomId) {
+        socket.emit('control', {'button': 'join-room', 'roomId': roomId});
+    }
+}
+
+function createRoom(){
+    var roomName = document.getElementById('join-room-name').value;
+    if (roomName) {
+        socket.emit('control', {'button': 'create-room', 'name': roomName});
+        document.getElementById('create-room-container').style.display = 'none';
+    }
 }
 
 function join(){

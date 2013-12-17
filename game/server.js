@@ -17,9 +17,12 @@ function GameServer(sockets){
     {"id": 4, "pos": [100, 550], "direction": "u"}
     ];
     this.slots = [];
+    this.rooms = {};
+
+    this.roomModule = require('./Room');
 }
 
-GameServer.prototype.getNextFreeSlot = function(){
+GameServer.prototype.getNextFreeSlot = function() {
     for (var i in this.slots){
         if (!this.slots[i].socketId){
             return this.slots[i];
@@ -27,7 +30,7 @@ GameServer.prototype.getNextFreeSlot = function(){
     }
 };
 
-GameServer.prototype.start = function(){
+GameServer.prototype.start = function() {
 
     this.sockets.on('connection', function (socket) {
 
@@ -50,6 +53,10 @@ GameServer.prototype.start = function(){
                     _this.updateClients();
                 }
             }
+
+            if (data.button === 'create-room') {
+                _this.addRoom(socket, data.name);
+            }
         });
 
         socket.emit('state', {
@@ -64,6 +71,12 @@ GameServer.prototype.start = function(){
                 slot.bike = null;
             }
         });
+
+        _this.updateRoomsClients();
+
+        if (Object.keys(_this.rooms).length === 0){
+            _this.addRoom(socket, 'default');
+        }
     });
 
     this.resetSlots();
@@ -71,6 +84,12 @@ GameServer.prototype.start = function(){
     setInterval(function(){
         _this.mainLoop();
     }, _this.mainLoopInterval);
+};
+
+GameServer.prototype.addRoom = function(ownerSocket, name) {
+    var room = new _this.roomModule.Room(ownerSocket, _this.removeTags(name));
+    this.rooms[room.id] = room;
+    this.updateRoomsClients();
 };
 
 GameServer.prototype.initializePlayer = function(slot, socket, name) {
@@ -99,7 +118,7 @@ GameServer.prototype.initializePlayer = function(slot, socket, name) {
 
 };
 
-GameServer.prototype.resetSlots = function(){
+GameServer.prototype.resetSlots = function() {
     this.slots = [];
     for (var is in this.initialSlots){
         var islot = this.initialSlots[is];
@@ -113,7 +132,7 @@ GameServer.prototype.resetSlots = function(){
     }
 };
 
-GameServer.prototype.endGame = function(winnerBike){
+GameServer.prototype.endGame = function(winnerBike) {
     _this.gameStarted = false;
     _this.sockets.emit('state', {
         'state': 'endGame',
@@ -124,7 +143,7 @@ GameServer.prototype.endGame = function(winnerBike){
     _this.resetSlots();
 };
 
-GameServer.prototype.onBikeCollided = function(bike){
+GameServer.prototype.onBikeCollided = function(bike) {
     var last = true;
     for (var s in this.slots) {
         var slot = this.slots[s];
@@ -181,7 +200,7 @@ GameServer.prototype.mainLoop = function() {
     this.updateClients();
 };
 
-GameServer.prototype.updateClients = function(){
+GameServer.prototype.updateClients = function() {
     var bikesData = [];
     var bikes = this.getBikes();
     for (var b in bikes){
@@ -191,6 +210,17 @@ GameServer.prototype.updateClients = function(){
     this.sockets.emit('state', {
         'state': 'update',
         'bikes': bikesData
+    });
+};
+
+GameServer.prototype.updateRoomsClients = function() {
+    var roomsData = [];
+    for (var r in _this.rooms){
+        roomsData.push(_this.rooms[r].getData());
+    }
+    this.sockets.emit('state', {
+        'state': 'update-rooms',
+        'rooms': roomsData
     });
 };
 

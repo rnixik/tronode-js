@@ -1,19 +1,39 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= title %></title>
+    <title>Tronode.js</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <script src="/javascripts/socket.io.min.js"></script>
+    <script src="/javascripts/ejs.js"></script>
     <script src="/javascripts/bike.js"></script>
     <script src="/javascripts/client.js"></script>
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
+    <h1>Tronode.js</h1>
     <div class="game" id="game-container"></div>
+
+
+    <div class="join-room-container">
+
+      <ul id="rooms" class="rooms-list">
+    </ul>
+    <script type="template" id="room-tpl">
+       <h3>Rooms: </h3>
+      <% for(var i in rooms) {%>
+      <li><label><input type="radio" name="room" class="room-option"  value="<%= rooms[i].id %>">  <%= rooms[i].name %></label></li>
+      <% } %>
+    </script>
+
+      <button id="join-btn" class="join-room-btn">Join to chosen room</button>
+      <span id="create-room-container">
+        OR create <input id="join-room-name" type="text" placeholder="Room's name">
+        <button id="create-room-btn">Create room</button>
+      </span>
+    </div>
+
     <div class="join-container" id="join-container">
       <input id="join-name" type="text" placeholder="Your name" class="join-name">
-      <button id="join-btn" class="join-btn">Join</button>
+      <button id="join-btn" class="join-btn">Join to the battle</button>
     </div>
 
       <div>

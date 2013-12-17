@@ -44,3 +44,10 @@ a {
   height: 5px;
   display: inline-block;
 }
+.join-room-container {
+  margin: 12px 0;
+  border: 1px solid #000;
+  width: 560px;
+  padding: 16px;
+  overflow: hidden;
+}
