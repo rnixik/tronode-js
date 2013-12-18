@@ -3,6 +3,8 @@ var gameHeight = 600;
 var myBike;
 var bikes = [];
 var gameContainer;
+var myRoomId;
+var rooms;
 
 var keyUp = 38;
 var keyW = 87;
@@ -22,6 +24,8 @@ socket.on('state', function(data) {
 
     if (data.state === 'connected'){
         startGame();
+    } else if (data.state === 'gameJoined'){
+        gameContainer.innerHTML = '';
         for (var b in data.existedBikes){
             var bikeData = data.existedBikes[b];
             var bike = new Bike(bikeData.number);
@@ -66,17 +70,20 @@ socket.on('state', function(data) {
         bike.setData(data.bike);
         bikes.push(bike);
     } else if (data.state === 'update-rooms'){
-        updateRoomsList(data.rooms);
+        rooms = data.rooms;
+        updateRoomsList();
+    } else if (data.state === 'change-room'){
+        myRoomId = data.room.id;
+        updateRoomsList();
     }
 
 });
 
-function updateRoomsList(rooms) {
-    console.log(rooms);
+function updateRoomsList() {
     var roomTpl = document.getElementById('room-tpl').innerHTML;
     var container = document.getElementById('rooms');
     var template = new EJS({text: roomTpl});
-    container.innerHTML = template.render({'rooms': rooms});
+    container.innerHTML = template.render({'rooms': rooms, 'myRoomId': myRoomId});
 }
 
 function startGame() {
@@ -98,8 +105,9 @@ function startGame() {
 }
 
 function joinRoom(){
-    var roomId = document.querySelector('.room-option:checked').value;
-    if (roomId) {
+    var checked = document.querySelector('.room-option:checked');
+    if (checked) {
+        var roomId = checked.value;
         socket.emit('control', {'button': 'join-room', 'roomId': roomId});
     }
 }

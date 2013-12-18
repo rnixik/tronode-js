@@ -51,3 +51,6 @@ a {
   padding: 16px;
   overflow: hidden;
 }
+.join-room-container .room-option-checked {
+  font-weight: bold;
+}

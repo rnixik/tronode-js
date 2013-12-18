@@ -14,6 +14,7 @@ function Bike(number) {
     this.makeTurn = false;
     this.collided = false;
     this.name = "";
+    this.roomId;
 
     this.onCollideCallback = null;
 }

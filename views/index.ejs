@@ -20,11 +20,11 @@
     <script type="template" id="room-tpl">
        <h3>Rooms: </h3>
       <% for(var i in rooms) {%>
-      <li><label><input type="radio" name="room" class="room-option"  value="<%= rooms[i].id %>">  <%= rooms[i].name %></label></li>
+      <li class="<% if (myRoomId === rooms[i].id) { %> room-option-checked <% } %>"><label><input type="radio" name="room" class="room-option"  value="<%= rooms[i].id %>">  <%= rooms[i].name %></label></li>
       <% } %>
     </script>
 
-      <button id="join-btn" class="join-room-btn">Join to chosen room</button>
+      <button id="join-room-btn" class="join-room-btn">Join chosen room</button>
       <span id="create-room-container">
         OR create <input id="join-room-name" type="text" placeholder="Room's name">
         <button id="create-room-btn">Create room</button>
@@ -33,7 +33,7 @@
 
     <div class="join-container" id="join-container">
       <input id="join-name" type="text" placeholder="Your name" class="join-name">
-      <button id="join-btn" class="join-btn">Join to the battle</button>
+      <button id="join-btn" class="join-btn">Join the battle</button>
     </div>
 
       <div>
