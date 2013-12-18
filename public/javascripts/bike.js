@@ -14,9 +14,19 @@ function Bike(number) {
     this.makeTurn = false;
     this.collided = false;
     this.name = "";
-    this.roomId;
 
     this.onCollideCallback = null;
+}
+
+Bike.prototype.resetPosition = function(x, y, direction) {
+    this.x = x;
+    this.y = y;
+    this.direction = direction;
+    this.currentHtmlWidth = this.defaultWidth;
+    this.currentHtmlHeight = this.defaultH;
+    this.makeTurn = false;
+    this.collided = false;
+    this.turnPoints = [];
 }
 
 Bike.prototype.allocate = function(parent) {

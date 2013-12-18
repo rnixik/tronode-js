@@ -75,6 +75,23 @@ socket.on('state', function(data) {
     } else if (data.state === 'change-room'){
         myRoomId = data.room.id;
         updateRoomsList();
+    } else if (data.state === 'restart'){
+        gameContainer.innerHTML = '';
+        var myBikeNumber = null;
+        if (myBike) {
+            myBikeNumber = myBike.number;
+        }
+        bikes = [];
+        for (var b in data.bikes){
+            var bikeData = data.bikes[b];
+            var bike = new Bike(bikeData.number);
+            bike.allocate(gameContainer);
+            bike.setData(bikeData);
+            bikes.push(bike);
+            if (myBikeNumber && bike.number === myBikeNumber){
+                myBike = bike;
+            }
+        }
     }
 
 });
@@ -116,14 +133,13 @@ function createRoom(){
     var roomName = document.getElementById('join-room-name').value;
     if (roomName) {
         socket.emit('control', {'button': 'create-room', 'name': roomName});
-        document.getElementById('create-room-container').style.display = 'none';
     }
 }
 
 function join(){
     var joinName = document.getElementById('join-name').value;
     if (joinName) {
-        socket.emit('control', {'button': 'join', 'name': joinName});
+        socket.emit('control', {'button': 'joinBattle', 'name': joinName});
         document.getElementById('join-container').style.display = 'none';
     }
 }
