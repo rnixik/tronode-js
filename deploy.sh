@@ -9,11 +9,8 @@ HGSOURCE="ssh://hg@bitbucket.org/rnix/tronode.js"
 
 cd "$TARG" || exit 1
 
-echo hg pull "$HGSOURCE"
-hg pull "$HGSOURCE"
-
-echo hg update
-hg update
+echo hg pull -u "$HGSOURCE"
+hg pull -u "$HGSOURCE"
 
 forever restart app.js
 
