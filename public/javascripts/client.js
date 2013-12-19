@@ -44,9 +44,6 @@ socket.on('state', function(data) {
         document.getElementById('bike-example-name').innerHTML = myBike.name;
         bikeExample.style.display = 'block';
 
-
-        document.getElementById('start-btn').style.display = 'block';
-
     } else if (data.state === 'update'){
         for (var lb in bikes){
             var localBike = bikes[lb];
@@ -77,6 +74,7 @@ socket.on('state', function(data) {
         updateRoomsList();
     } else if (data.state === 'restart'){
         gameContainer.innerHTML = '';
+        document.getElementById('endgame-container').style.display = 'none';
         var myBikeNumber = null;
         if (myBike) {
             myBikeNumber = myBike.number;
@@ -109,14 +107,6 @@ function startGame() {
     bindEvents(body);
 
     document.getElementById('join-btn').onclick = join;
-    document.getElementById('reset').onclick = reset;
-    document.getElementById('start-btn').onclick = function(){
-        if (myBike){
-            socket.emit('control', {'button': 'start'});
-            document.getElementById('start-btn').style.display = 'none';
-        }
-    };
-
     document.getElementById('join-room-btn').onclick = joinRoom;
     document.getElementById('create-room-btn').onclick = createRoom;
 }
@@ -142,19 +132,6 @@ function join(){
         socket.emit('control', {'button': 'joinBattle', 'name': joinName});
         document.getElementById('join-container').style.display = 'none';
     }
-}
-
-function reset() {
-    gameContainer.innerHTML = '';
-    for (var b in bikes){
-        var bike = bikes[b];
-        bike.allocate(gameContainer);
-        bike.createHtml();
-        bike.updateHtml();
-    }
-
-    document.getElementById('endgame-container').style.display = 'none';
-    join();
 }
 
 function bindEvents(container) {

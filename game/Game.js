@@ -6,6 +6,9 @@ function Game(sockets){
     this.gameWidth = 800;
     this.gameHeight = 600;
 
+    this.restartTimeoutMs = 5000;
+    this.restartTimeoutId = null;
+
     this.gameStarted = false;
     this.gameTime = 0;
 
@@ -42,10 +45,8 @@ Game.prototype.broadcast = function(socket, event, data) {
         if (this.sockets[s].id !== socket.id){
             var isocket = this.sockets[s];
             isocket.emit(event, data);
-            console.log('EMIT!');
         }
     }
-    console.log('broad!', event);
 };
 
 Game.prototype.onControl = function(socket, data) {
@@ -124,21 +125,25 @@ Game.prototype.initializePlayer = function(slot, socket, name) {
 };
 
 Game.prototype.restart = function() {
+    var num = 0;
     for (var s in this.slots){
         var slot = this.slots[s];
         for (var is in this.initialSlots){
             var islot = this.initialSlots[is];
             if (slot.bike && islot.id === slot.id){
                 slot.bike.resetPosition(islot.pos[0], islot.pos[1], islot.direction);
+                num++;
             }
         }
     }
-    this.emit('state', {
-        'state': 'restart',
-        'bikes': this.getBikes().map(function(bike){return bike.getData();})
-     });
+    if (num){
+        this.emit('state', {
+            'state': 'restart',
+            'bikes': this.getBikes().map(function(bike){return bike.getData();})
+        });
 
-    this.gameStarted = true;
+        this.gameStarted = true;
+    }
 };
 
 Game.prototype.resetSlots = function() {
@@ -165,10 +170,6 @@ Game.prototype.endGame = function(winnerBike) {
             'time': this.gameTime
         });
         this.gameTime = 0;
-
-        setTimeout(function(){
-            _this.restart();
-        }, 3000);
     }
 };
 
@@ -216,17 +217,24 @@ Game.prototype.getBikes = function() {
 };
 
 Game.prototype.mainLoop = function() {
-    if (!this.gameStarted){
-        return;
+    if (this.gameStarted){
+
+        var bikes = this.getBikes();
+        for (var b in bikes) {
+         var bike = bikes[b];
+            bike.move(10);
+        }
+        this.detectCollisions();
+        this.gameTime += this.mainLoopInterval;
+        this.updateClients();
+
+    } else if (!this.restartTimeoutId){
+        var _this = this;
+        this.restartTimeoutId = setTimeout(function(){
+            _this.restart();
+            _this.restartTimeoutId = null;
+        }, this.restartTimeoutMs);
     }
-    var bikes = this.getBikes();
-    for (var b in bikes) {
-        var bike = bikes[b];
-        bike.move(10);
-    }
-    this.detectCollisions();
-    this.gameTime += this.mainLoopInterval;
-    this.updateClients();
 };
 
 Game.prototype.updateClients = function() {
