@@ -3,52 +3,68 @@ body
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
 a
   color: #00B7FF
+
+.game-wrapper
+  background: #eee url('../images/bg_wrap.jpg')
+  height: 622px
+  width: 822px
+  border: 1px solid black
+
 .game
   height: 600px
   width: 800px
-  background: #eee
+  background: #eee url('../images/bg.jpg')
   border: 1px solid black
+  position: relative
+  top: 10px
+  left: 10px
 
 .game .bike
   position: relative
 .game .bike .bike-trail
   position: absolute
+  box-shadow: -2px 2px 5px #000
 
- glowWidth = 2px
 .bike-1 .bike-trail
   background-color: #f00
-  box-shadow: 0 0 glowWidth #f00
+
 .bike-2 .bike-trail
   background-color: #0f0
-  box-shadow: 0 0 glowWidth #0f0
 .bike-3 .bike-trail
   background-color: #00f
-  box-shadow: 0 0 glowWidth #00f
 .bike-4 .bike-trail
   background-color: #0ff
-  box-shadow: 0 0 glowWidth #0ff
 .bike-5 .bike-trail
   background-color: #f0f
-  box-shadow: 0 0 glowWidth #f0f
 .bike-6 .bike-trail
   background-color: #ff0
-  box-shadow: 0 0 glowWidth #ff0
 
 .game .bike .bike-head
   position: absolute
   z-index: 10
-  width: 5px
-  height: 5px
-  border: 1px solid black
-  box-shadow: 0 0 4px black;
+  width: 16px
+  height: 16px
+  background-image: url('../images/bug.png')
+
+.bike .direction-u
+  background-position: 0 0
+.bike .direction-r
+  background-position: 15px 0
+.bike .direction-d
+  background-position: 15px 15px
+.bike .direction-l
+  background-position: 0 15px
 
  .game .bike .bike-name
-   width: 60px
-   height: 12px
-   font-size: 10px
+   width: 120px
+   padding: 0 4px
+   height: 16px
+   font-size: 14px
    overflow: hidden
    position: relative
-   top: 4px
+   color: #fff
+   top: -12px
+   text-shadow: -2px 2px 5px #000
 
 #bike-example .bike-trail
   width: 30px

@@ -15,6 +15,8 @@ function Bike(number) {
     this.collided = false;
     this.name = "";
 
+    this.bikeHeadDefaultClass = 'bike-head';
+
     this.onCollideCallback = null;
 }
 
@@ -35,11 +37,15 @@ Bike.prototype.allocate = function(parent) {
     parent.appendChild(this.container);
 
     this.headHtml = document.createElement("div");
-    this.headHtml.className = "bike-head";
+    this.headHtml.className = this.bikeHeadDefaultClass;
     this.container.appendChild(this.headHtml);
 
     this.headHtml.style.left = (this.x - 1) + "px";
     this.headHtml.style.top = (this.y - 1) + "px";
+
+    if (this.direction) {
+        this.headHtml.className = this.bikeHeadDefaultClass + ' direction-' + this.direction;
+    }
 };
 
 Bike.prototype.createHtml = function() {
@@ -50,6 +56,8 @@ Bike.prototype.createHtml = function() {
     this.currentHtml.style.width = this.defaultWidth+ "px";
     this.currentHtml.style.height = this.defaultHeight + "px";
     this.container.appendChild(this.currentHtml);
+
+
 };
 
 Bike.prototype.move = function(stepSize) {
@@ -119,8 +127,12 @@ Bike.prototype.updateHtml = function() {
 
 
 
-    this.headHtml.style.left = (this.x - 1) + "px";
-    this.headHtml.style.top = (this.y - 1) + "px";
+    this.headHtml.style.left = (this.x - 5) + "px";
+    this.headHtml.style.top = (this.y - 5) + "px";
+
+    if (this.direction) {
+        this.headHtml.className = this.bikeHeadDefaultClass + ' direction-' + this.direction;
+    }
 
 };
 
