@@ -15,6 +15,8 @@ var keyS = 83;
 var keyLeft = 37;
 var keyA = 65;
 
+var moveStepSize = 10;
+
 
 var socket = io.connect(document.location);
 socket.on('state', function(data) {
@@ -48,7 +50,7 @@ socket.on('state', function(data) {
                 var bike = data.bikes[b];
                 if (bike.number === localBike.number){
                     localBike.setData(bike);
-                    localBike.move(10);
+                    localBike.move(moveStepSize);
                 }
             }
         }

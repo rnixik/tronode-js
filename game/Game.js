@@ -1,10 +1,12 @@
 function Game(sockets){
     this.sockets = sockets;
 
-    this.mainLoopInterval = 100;
+    this.mainLoopInterval = 50;
+    this.moveStepSize = 10;
 
     this.gameWidth = 800;
     this.gameHeight = 600;
+
 
     this.restartTimeoutMs = 5000;
     this.restartTimeoutId = null;
@@ -226,7 +228,7 @@ Game.prototype.mainLoop = function() {
         var bikes = this.getBikes();
         for (var b in bikes) {
          var bike = bikes[b];
-            bike.move(10);
+            bike.move(this.moveStepSize);
         }
         this.detectCollisions();
         this.gameTime += this.mainLoopInterval;
@@ -258,13 +260,9 @@ Game.prototype.updateClients = function() {
 Game.prototype.detectCollisions = function() {
     /* line = [x1, y1, x2, y2] */
     var lines = [];
-    lines.push([0, 0, this.gameWidth, 0]);
-    lines.push([this.gameWidth, 0, this.gameWidth, this.gameHeight]);
-    lines.push([this.gameWidth, this.gameHeight, 0, this.gameHeight]);
-    lines.push([0, this.gameHeight, 0, 0]);
-
     var bike;
     var bikes = this.getBikes();
+    var eps = 0.01;
 
     /* add lines from bikes' trails */
     for (var b in bikes) {
@@ -295,11 +293,16 @@ Game.prototype.detectCollisions = function() {
 
     for (var b2 in bikes) {
         bike = bikes[b2];
+        var x = bike.x, y = bike.y;
+
+        if (x < eps || x + this.moveStepSize > this.gameWidth || y < eps || y + this.moveStepSize > this.gameHeight) {
+            bike.collide();
+            continue;
+        }
+
         for (var li in lines) {
             var line = lines[li];
             var x1 = line[0], y1 = line[1], x2 = line[2], y2 = line[3];
-            var x = bike.x, y = bike.y;
-            var eps = 0.01;
 
             if (typeof line[4] === "number" && line[4] === bike.number) {
                 /* last line of current bike */

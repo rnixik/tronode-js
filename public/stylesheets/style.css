@@ -19,21 +19,27 @@ a {
 }
 .bike-1 .bike-trail {
   background-color: #f00;
+  box-shadow: 0 0 2px #f00;
 }
 .bike-2 .bike-trail {
   background-color: #0f0;
+  box-shadow: 0 0 2px #0f0;
 }
 .bike-3 .bike-trail {
   background-color: #00f;
+  box-shadow: 0 0 2px #00f;
 }
 .bike-4 .bike-trail {
   background-color: #0ff;
+  box-shadow: 0 0 2px #0ff;
 }
 .bike-5 .bike-trail {
   background-color: #f0f;
+  box-shadow: 0 0 2px #f0f;
 }
 .bike-6 .bike-trail {
   background-color: #ff0;
+  box-shadow: 0 0 2px #ff0;
 }
 .game .bike .bike-head {
   position: absolute;
@@ -41,6 +47,7 @@ a {
   width: 5px;
   height: 5px;
   border: 1px solid #000;
+  box-shadow: 0 0 4px #000;
 }
 .game .bike .bike-name {
   width: 60px;
