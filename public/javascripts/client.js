@@ -18,9 +18,6 @@ var keyA = 65;
 
 var socket = io.connect(document.location);
 socket.on('state', function(data) {
-    if (data.state !== 'update'){
-        console.log(data);
-    }
 
     if (data.state === 'connected'){
         startGame();

@@ -180,7 +180,7 @@ Bike.prototype.setData = function(data) {
     this.x = data.x;
     this.y = data.y;
     this.direction = data.direction;
-    this.turnPoints = data.turnPoints;
+    //this.turnPoints = data.turnPoints;
     this.currentHtmlWidth = data.currentHtmlWidth;
     this.currentHtmlHeight = data.currentHtmlHeight;
 
@@ -202,7 +202,7 @@ Bike.prototype.getData = function() {
     data.x = this.x;
     data.y = this.y;
     data.direction = this.direction;
-    data.turnPoints = this.turnPoints;
+    //data.turnPoints = this.turnPoints;
     data.currentHtmlWidth = this.currentHtmlWidth;
     data.currentHtmlHeight = this.currentHtmlHeight;
     data.makeTurn = this.makeTurn;
