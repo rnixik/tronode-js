@@ -27,7 +27,7 @@ Bike.prototype.resetPosition = function(x, y, direction) {
     this.makeTurn = false;
     this.collided = false;
     this.turnPoints = [];
-}
+};
 
 Bike.prototype.allocate = function(parent) {
     this.container = document.createElement("div");
@@ -193,6 +193,7 @@ Bike.prototype.setData = function(data) {
 
     this.makeTurn = data.makeTurn;
     this.name = data.name;
+    this.headHtml.innerHTML = '<div class="bike-name">' + this.name + '</div>';
 };
 
 Bike.prototype.getData = function() {
