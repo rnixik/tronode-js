@@ -32,6 +32,9 @@ a {
 .bike-5 .bike-trail {
   background-color: #f0f;
 }
+.bike-6 .bike-trail {
+  background-color: #ff0;
+}
 .game .bike .bike-head {
   position: absolute;
   z-index: 10;
@@ -40,7 +43,7 @@ a {
   border: 1px solid #000;
 }
 .game .bike .bike-name {
-  width: 40px;
+  width: 60px;
   height: 12px;
   font-size: 10px;
   overflow: hidden;

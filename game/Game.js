@@ -16,7 +16,9 @@ function Game(sockets){
     {"id": 1, "pos": [50, 50], "direction": "r"},
     {"id": 2, "pos": [750, 100], "direction": "d"},
     {"id": 3, "pos": [700, 550], "direction": "l"},
-    {"id": 4, "pos": [100, 550], "direction": "u"}
+    {"id": 4, "pos": [100, 550], "direction": "u"},
+    {"id": 5, "pos": [350, 450], "direction": "u"},
+    {"id": 6, "pos": [450, 450], "direction": "u"}
     ];
     this.slots = {};
 
@@ -55,6 +57,8 @@ Game.prototype.onControl = function(socket, data) {
                 var slot = this.getNextFreeSlot();
                 if (slot) {
                     this.initializePlayer(slot, socket, data.name);
+                } else {
+                    socket.emit('state', {'state': 'no-slot'});
                 }
             } else if (bike) {
                 if (data.button === 'right') {

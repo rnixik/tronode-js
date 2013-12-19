@@ -87,6 +87,8 @@ socket.on('state', function(data) {
                 myBike = bike;
             }
         }
+    } else if (data.state === 'no-slot') {
+        alert('There are not slots in this room. Create your own room.');
     }
 
 });
