@@ -17,8 +17,9 @@ var keyA = 65;
 
 var moveStepSize = 10;
 
+var wsAdress = 'http://' + document.location.hostname + ':3000';
 
-var socket = io.connect(document.location);
+var socket = io.connect(wsAdress);
 socket.on('state', function(data) {
 
     if (data.state === 'connected'){
