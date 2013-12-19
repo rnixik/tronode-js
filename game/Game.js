@@ -1,7 +1,7 @@
 function Game(sockets){
     this.sockets = sockets;
 
-    this.mainLoopInterval = 50;
+    this.mainLoopInterval = 70;
     this.moveStepSize = 10;
 
     this.gameWidth = 800;
