@@ -8,8 +8,8 @@ function BotSocket(game) {
 
     this.battleground = {};
 
-    this.BG_OCCUPIED = 1;
-    this.BG_EMPTY = 0;
+    this.BG_OCCUPIED = -1;
+    this.BG_EMPTY = -2;
 
     this.botName = this.id;
 }
@@ -47,17 +47,22 @@ BotSocket.prototype.emit = function(event, data) {
             }
         break;
         case 'update':
+            var prevX = this.myBike.x;
+            var prevY = this.myBike.y;
             for (var lb in this.bikes) {
                 var localBike = this.bikes[lb];
                 for (var b in data.bikes){
                     var bike = data.bikes[b];
                     if (bike.number === localBike.number) {
                         localBike = bike;
+                        if (this.myBike.number === bike.number) {
+                            this.myBike = bike;
+                        }
                         this.occupy(bike.x, bike.y);
                     }
                 }
             }
-            if (!this.myBike.collided) {
+            if ( !this.myBike.collided && (prevX !== this.myBike.x || prevY !== this.myBike.y) ) {
                 this.update();
             }
 
@@ -68,16 +73,16 @@ BotSocket.prototype.emit = function(event, data) {
 BotSocket.prototype.control = function(data) {
     if (this.game) {
         this.game.onControl(this, data);
-        console.log(this.id + ' : ' + data.button);
+        //console.log(this.id + ' : ' + data.button);
     }
 };
 
 BotSocket.prototype.initializeBattleground = function() {
     var x, y;
-     this.battleground = {};
+    this.battleground = {};
     for (x = 0; x <= this.game.gameWidth; x += this.game.moveStepSize) {
         this.battleground[x] = {};
-        for (y = 0; y <= this.gameHeight; y += this.game.moveStepSize) {
+        for (y = 0; y <= this.game.gameHeight; y += this.game.moveStepSize) {
             this.battleground[x][y] = this.BG_EMPTY;
 
             if (x === 0 || x === this.game.gameWidth || y === 0 || y === this.gameHeight) {
@@ -96,14 +101,154 @@ BotSocket.prototype.start = function() {
 };
 
 BotSocket.prototype.update = function() {
-    var r = Math.random();
-    if (r > 0.95) {
-        this.control({'button': 'right'});
-    } else if (r > 0.90) {
-        this.control({'button': 'left'});
+    var destination = this.getDesirablePoint();
+    var currentPoint = [this.myBike.x, this.myBike.y];
+    var path = this.algorithmLee(currentPoint, destination);
+
+    if (path && typeof path[1] !== 'undefined') {
+        this.moveToPoint(path[1]);
     }
 };
 
+BotSocket.prototype.moveToPoint = function(point) {
+    var cx = this.myBike.x;
+    var cy = this.myBike.y;
+    var dir = this.myBike.direction;
+    var dx = point[0];
+    var dy = point[1];
+
+    if ( (dx > cx && dir === 'u') || (dx < cx && dir === 'd') ) {
+        this.control({'button': 'right'});
+    }
+
+    if ( (dy > cy && dir === 'r') || (dy < cy && dir === 'l') ) {
+        this.control({'button': 'right'});
+    }
+
+    if ( (dx < cx && dir === 'u') || (dx > cx && dir === 'd') ) {
+        this.control({'button': 'left'});
+    }
+
+    if ( (dy < cy && dir === 'r') || (dy > cy && dir === 'l') ) {
+        this.control({'button': 'left'});
+    }
+
+    //this.control({'button': 'left'});
+};
+
+BotSocket.prototype.getDesirablePoint = function() {
+    var point = [];
+    var H = Object.keys(this.battleground[0]).length - 1;
+    var W = Object.keys(this.battleground).length - 1;
+
+    var x, y, i, j;
+
+    var found = false;
+    var iter = 0;
+    do {
+        i = this.getRandomInt(1, W);
+        j = this.getRandomInt(1, H);
+        x = i * this.game.moveStepSize;
+        y = j * this.game.moveStepSize;
+        if (this.battleground[x][y] === this.BG_EMPTY) {
+            found = true;
+        }
+        iter++;
+    } while (!found && iter < 1000);
+    point = [x, y];
+
+    return point;
+};
+
+BotSocket.prototype.getRandomInt = function(min, max) {
+    return min + Math.floor(Math.random() * (max - min + 1));
+};
+
+BotSocket.prototype.algorithmLee = function(start, end) {
+    var grid = {};
+    var x, y;
+    var H = Object.keys(this.battleground[0]).length;
+    var W = Object.keys(this.battleground).length;
+
+    var i, j;
+    x = 0;
+    for (i in this.battleground) {
+        y = 0;
+        grid[x] = {};
+        for (j in this.battleground[i]) {
+            grid[x][y] = this.battleground[i][j];
+            y++;
+        }
+        x++;
+    }
+    W = x - 1;
+    H = y - 1;
+
+var steps = this.game.moveStepSize;
+    var ax = start[0] / steps;
+    var ay = start[1] / steps;
+    var bx = end[0] / steps;
+    var by = end[1] / steps;
+
+  var dx = [1, 0, -1, 0];
+  var dy = [0, 1, 0, -1];
+  var d, k;
+  var stop;
+  var len;
+
+  // 1. Initialisation
+  d = 0;
+  grid[ax][ay] = 0;
+
+  // 2. Wave expansion
+  do {
+    stop = true;
+    for ( x = 0; x < W; ++x ) {
+      for ( y = 0; y < H; ++y ) {
+        if ( grid[x][y] == d ) {
+            for ( k = 0; k < 4; k++ ) {
+                if ( grid[x + dx[k]][y + dy[k]] === this.BG_EMPTY ) {
+                    stop = false;
+                    grid[x + dx[k]][y + dy[k]] = d + 1;
+                    }
+                }
+            }
+        }
+    }
+    d++;
+  } while ( !stop && grid[bx][by] === this.BG_EMPTY );
+
+  if (grid[bx][by] === this.BG_EMPTY) {
+    //not found
+    return false;
+  }
+
+  // 3. Backtrace
+  len = grid[bx][by];
+  x = bx;
+  y = by;
+  d = len;
+  var path = [];
+  while ( d > 0 ) {
+    path[d] = [x, y];
+    d--;
+    for (k = 0; k < 4; k++)
+      if (grid[x + dx[k]][y + dy[k]] == d)
+      {
+        x = x + dx[k];
+        y = y + dy[k];
+        break;
+      }
+  }
+
+  path[0] = [ax, ay];
+
+  for (i in path) {
+    path[i] = [path[i][0] * steps, path[i][1] * steps];
+  }
+
+  return path;
+};
 
 
 if (typeof exports === 'object') {
