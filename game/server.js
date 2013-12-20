@@ -19,10 +19,12 @@ GameServer.prototype.start = function() {
             if (data.button === 'create-room') {
                 var room = _this.addRoom(socket, data.name);
                 _this.moveSocketToRoom(socket, room);
+                _this.updateRoomsClients();
             } else if (data.button === 'join-room'){
                 var room = _this.rooms[data.roomId];
                 if (room){
                     _this.moveSocketToRoom(socket, room);
+                    _this.updateRoomsClients();
                 }
             } else {
                 var room = _this.getRoomWithSocketId(socket.id);
@@ -42,8 +44,24 @@ GameServer.prototype.start = function() {
         _this.moveSocketToRoom(socket, defaultRoom);
         _this.updateRoomsClients();
     });
+
+    setInterval(function(){
+        _this.cleanRooms();
+    }, 10000);
 };
 
+GameServer.prototype.cleanRooms = function() {
+    var r, room;
+    for (r in this.rooms){
+        if (r === 'default') {
+            continue;
+        }
+        if (this.rooms[r].getData().socketsNum === 0) {
+            delete this.rooms[r];
+            this.updateRoomsClients();
+        }
+    }
+};
 
 GameServer.prototype.moveSocketToRoom = function(socket, room) {
     var r, iroom, s;

@@ -46,7 +46,7 @@
     <script type="template" id="room-tpl">
        <h3>Rooms: </h3>
       <% for(var i in rooms) {%>
-      <li class="<% if (myRoomId === rooms[i].id) { %> room-option-checked <% } %>"><label><input type="radio" name="room" class="room-option"  value="<%= rooms[i].id %>">  <%= rooms[i].name %></label></li>
+      <li class="<% if (myRoomId === rooms[i].id) { %> room-option-checked <% } %>"><label><input type="radio" name="room" class="room-option"  value="<%= rooms[i].id %>">  <%= rooms[i].name %> (<%=rooms[i].socketsNum%>)</label></li>
       <% } %>
     </script>
 

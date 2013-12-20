@@ -27,7 +27,7 @@ Room.prototype.getData = function() {
         var bike = this.bikes[b];
         data.bikes[bike.number] = bike.getData();
     }
-    data.socketsNum = this.sockets.length;
+    data.socketsNum = Object.keys(this.sockets).length;
 
     return data;
 };
