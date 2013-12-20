@@ -3,6 +3,7 @@ function GameServer(sockets){
 
     this.rooms = {};
     this.roomModule = require('./Room');
+    this.botModule = require('./../public/javascripts/BotSocket');
     var utilsModule = require('./utils');
     this.utils = utilsModule.utils;
 }
@@ -96,6 +97,11 @@ GameServer.prototype.addRoom = function(ownerSocket, name) {
     var room = new this.roomModule.Room(ownerSocket, this.utils.removeTags(name));
     room.startGame();
     this.rooms[room.id] = room;
+
+    if (name.toLowerCase() === 'test bot' || name.toLowerCase() === 'bot test') {
+        this.addBots(room, 4);
+    }
+
     this.updateRoomsClients();
     return room;
 };
@@ -114,15 +120,18 @@ GameServer.prototype.addBotRoom = function() {
     room.startGame();
     this.rooms[room.id] = room;
 
-    var botModule = require('./BotSocket');
-    for (var i=0; i<3; i++) {
-        var botSocket = new botModule.BotSocket(room.game);
-        room.sockets[botSocket.id] = botSocket;
-        botSocket.start();
-    }
+    this.addBots(room, 3);
 
     return room;
 };
+
+GameServer.prototype.addBots = function(room, quantity) {
+    for (var i=0; i<quantity; i++) {
+        var botSocket = new this.botModule.BotSocket(room.game);
+        room.sockets[botSocket.id] = botSocket;
+        botSocket.start();
+    }
+}
 
 GameServer.prototype.updateRoomsClients = function() {
     var roomsData = [];

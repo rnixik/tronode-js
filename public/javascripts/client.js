@@ -6,6 +6,8 @@ var gameContainer;
 var myRoomId;
 var rooms;
 
+var botSocket = null;
+
 var keyUp = 38;
 var keyW = 87;
 var keyRight = 39;
@@ -21,6 +23,8 @@ var wsAdress = 'http://' + document.location.hostname + ':3000';
 
 var socket = io.connect(wsAdress);
 socket.on('state', function(data) {
+
+    sendStateToBot(data);
 
     if (data.state === 'connected'){
         startGame();
@@ -97,6 +101,54 @@ socket.on('state', function(data) {
 
 });
 
+var dp = null;
+function sendStateToBot(data) {
+    var botRoom = false;
+    if (rooms && myRoomId) {
+        for (var r in rooms) {
+            if (rooms[r].id === myRoomId 
+                && (rooms[r].name.toLowerCase() === 'bot test' || rooms[r].name.toLowerCase() === 'test bot')) {
+                botRoom = true;
+            }
+        }
+    }
+    if (!botRoom) {
+        return;
+    }
+
+    if (!botSocket) {
+        botSocket = new BotSocket({
+            'gameWidth': gameWidth,
+            'gameHeight': gameHeight,
+            'moveStepSize': moveStepSize,
+            'socket': socket
+        });
+        window.botSocket = botSocket;
+    }
+
+    if (botSocket) {
+        botSocket.emit('state', data);
+
+        if (gameContainer) {
+            dp = document.getElementById('dp');
+            if (!dp){
+                dp = document.createElement('div');
+                dp.style.position = 'absolute';
+                dp.style.width = '5px';
+                dp.style.height = '5px';
+                dp.id = 'dp';
+                dp.innerHTML = 'X';
+                gameContainer.appendChild(dp);
+            }
+        }
+        if (dp && botSocket.desiredPoint){
+            dp.style.left = botSocket.desiredPoint[0] + 'px';
+            dp.style.top = botSocket.desiredPoint[1] + 'px';
+        }
+        
+    }
+}
+
 function updateRoomsList() {
     var roomTpl = document.getElementById('room-tpl').innerHTML;
     var container = document.getElementById('rooms');
@@ -112,6 +164,7 @@ function startGame() {
     document.getElementById('join-btn').onclick = join;
     document.getElementById('join-room-btn').onclick = joinRoom;
     document.getElementById('create-room-btn').onclick = createRoom;
+    document.getElementById('create-bot-test-room-btn').onclick = createTestBotRoom;
 }
 
 function joinRoom(){
@@ -127,6 +180,10 @@ function createRoom(){
     if (roomName) {
         socket.emit('control', {'button': 'create-room', 'name': roomName});
     }
+}
+
+function createTestBotRoom(){
+    socket.emit('control', {'button': 'create-room', 'name': 'Test bot'});
 }
 
 function join(){
