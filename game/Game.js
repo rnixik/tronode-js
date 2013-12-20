@@ -227,7 +227,7 @@ Game.prototype.mainLoop = function() {
 
         var bikes = this.getBikes();
         for (var b in bikes) {
-         var bike = bikes[b];
+            var bike = bikes[b];
             bike.move(this.moveStepSize);
         }
         this.detectCollisions();

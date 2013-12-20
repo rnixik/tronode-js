@@ -9,6 +9,7 @@ function GameServer(sockets){
 
 GameServer.prototype.start = function() {
     var defaultRoom = this.addDefaultRoom();
+    this.addBotRoom();
     var _this = this;
 
     this.sockets.on('connection', function (socket) {
@@ -104,6 +105,22 @@ GameServer.prototype.addDefaultRoom = function() {
     room.id = 'default';
     room.startGame();
     this.rooms[room.id] = room;
+    return room;
+};
+
+GameServer.prototype.addBotRoom = function() {
+    var room = new this.roomModule.Room(null, 'With bots');
+    room.id = 'bot';
+    room.startGame();
+    this.rooms[room.id] = room;
+
+    var botModule = require('./BotSocket');
+    for (var i=0; i<3; i++) {
+        var botSocket = new botModule.BotSocket(room.game);
+        room.sockets[botSocket.id] = botSocket;
+        botSocket.start();
+    }
+
     return room;
 };
 
