@@ -15,6 +15,7 @@ function BotSocket(game) {
 
     this.movements = 0;
     this.desiredPoint;
+    this.updDestinationInterval = 5;
 }
 
 BotSocket.prototype.emit = function(event, data) {
@@ -107,8 +108,8 @@ BotSocket.prototype.start = function() {
 
 BotSocket.prototype.update = function() {
     var destination;
-    var updDestinationInterval = 2;
-    if (!this.desiredPoint || this.movements % updDestinationInterval === 0) {
+    var updDestinationInterval = 1;
+    if (!this.desiredPoint || this.movements % this.updDestinationInterval === 0) {
         this.desiredPoint = this.getDesiredPoint();
     }
     destination = this.desiredPoint;
@@ -122,6 +123,8 @@ BotSocket.prototype.update = function() {
 
     if (path && typeof path[1] !== 'undefined') {
         this.moveToPoint(path[1]);
+    } else {
+        this.desiredPoint = this.getDesiredPoint();
     }
 };
 
@@ -147,12 +150,85 @@ BotSocket.prototype.moveToPoint = function(point) {
     if ( (dy < cy && dir === 'r') || (dy > cy && dir === 'l') ) {
         this.control({'button': 'left'});
     }
+};
 
-    //this.control({'button': 'left'});
+BotSocket.prototype.getDesiredPointHeadhunter = function() {
+    var dx = [1, 0, -1, 0];
+    var dy = [0, 1, 0, -1];
+    var i, k;
+    var possibilies = [];
+
+    this.updDestinationInterval = 1;
+
+    for (var slotId in this.game.slots) {
+        var slot = this.game.slots[slotId];
+        var bike = slot.bike;
+        if (bike && !bike.collided && slot.socketId !== this.id && typeof this.game.sockets[slot.socketId].botName === 'undefined') {
+            var pos = [bike.x, bike.y];
+            var dirVector = [0, 0];
+            switch (bike.direction) {
+                case 'u':
+                    dirVector[1] = -1;
+                break;
+                case 'r':
+                    dirVector[0] = 1;
+                break;
+                case 'd':
+                    dirVector[1] = 1;
+                break;
+                case 'l':
+                    dirVector[0] = -1;
+                break;
+            }
+
+            for (i=1; i<=3; i++) {
+                possibilies.push([
+                    pos[0] + i * this.game.moveStepSize * dirVector[0], 
+                    pos[1] + i * this.game.moveStepSize * dirVector[1]
+                    ]);
+            }
+
+            var len = possibilies.length;
+            var possibility;
+            for (i = 0; i < len; i++) {
+                for (k = 0; k < 4; k++) {
+                    possibility = [possibilies[i][0], possibilies[i][1]];
+                    possibility[0] += dx[k] * this.game.moveStepSize;
+                    possibility[1] += dy[k] * this.game.moveStepSize;
+                    possibilies.push(possibility);
+                }
+            }
+
+            
+        }
+    }
+
+    var filteredPossibilies = [];
+    for (i in possibilies) {
+        if (typeof this.battleground[possibilies[i][0]] !== 'undefined' 
+            &&  typeof this.battleground[possibilies[i][0]][possibilies[i][1]] === 'number' 
+            && this.battleground[possibilies[i][0]][possibilies[i][1]] === this.BG_EMPTY) {
+            filteredPossibilies.push(possibilies[i]);
+        }
+    }
+
+    if (filteredPossibilies.length) {
+        var index = this.getRandomInt(0, filteredPossibilies.length);
+        return filteredPossibilies[index];
+    }
+    
 };
 
 BotSocket.prototype.getDesiredPoint = function() {
     var point = [];
+
+    point = this.getDesiredPointHeadhunter();
+    if (point) {
+        return point;
+    }
+    
+    this.updDestinationInterval = 80;
+    
     var H = Object.keys(this.battleground[0]).length - 1;
     var W = Object.keys(this.battleground).length - 1;
 
@@ -170,6 +246,8 @@ BotSocket.prototype.getDesiredPoint = function() {
         }
         iter++;
     } while (!found && iter < 1000);
+
+    
     point = [x, y];
 
     return point;
@@ -229,7 +307,7 @@ var steps = this.game.moveStepSize;
                         grid[x + dx[k]][y + dy[k]] = d + 1;
                     }
                 } catch (e) {
-                    console.log(x + dx[k]);
+                    console.log(x + dx[k], e);
                 }
             }
         }

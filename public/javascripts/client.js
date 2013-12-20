@@ -69,7 +69,8 @@ socket.on('state', function(data) {
     } else if (data.state === 'update-rooms'){
         rooms = data.rooms;
         updateRoomsList();
-    } else if (data.state === 'change-room'){
+    } else if (data.state === 'change-room') {
+        document.getElementById('join-container').style.display = 'block';
         myRoomId = data.room.id;
         updateRoomsList();
     } else if (data.state === 'restart'){
