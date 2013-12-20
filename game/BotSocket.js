@@ -12,6 +12,9 @@ function BotSocket(game) {
     this.BG_EMPTY = -2;
 
     this.botName = this.id;
+
+    this.movements = 0;
+    this.desiredPoint;
 }
 
 BotSocket.prototype.emit = function(event, data) {
@@ -30,6 +33,7 @@ BotSocket.prototype.emit = function(event, data) {
             this.occupy(data.bike.x, this.myBike.y);
         break;
         case 'restart':
+            this.movements = 0;
             this.initializeBattleground();
 
             var myBikeNumber = null;
@@ -42,8 +46,8 @@ BotSocket.prototype.emit = function(event, data) {
                 this.bikes.push(bike);
                 if (myBikeNumber && bike.number === myBikeNumber){
                     this.myBike = bike;
-                    this.occupy(bike.x, bike.y);
                 }
+                this.occupy(bike.x, bike.y);
             }
         break;
         case 'update':
@@ -63,6 +67,7 @@ BotSocket.prototype.emit = function(event, data) {
                 }
             }
             if ( !this.myBike.collided && (prevX !== this.myBike.x || prevY !== this.myBike.y) ) {
+                this.movements++;
                 this.update();
             }
 
@@ -101,7 +106,17 @@ BotSocket.prototype.start = function() {
 };
 
 BotSocket.prototype.update = function() {
-    var destination = this.getDesirablePoint();
+    var destination;
+    var updDestinationInterval = 2;
+    if (!this.desiredPoint || this.movements % updDestinationInterval === 0) {
+        this.desiredPoint = this.getDesiredPoint();
+    }
+    destination = this.desiredPoint;
+
+    if (!destination) {
+        return;
+    }
+
     var currentPoint = [this.myBike.x, this.myBike.y];
     var path = this.algorithmLee(currentPoint, destination);
 
@@ -136,7 +151,7 @@ BotSocket.prototype.moveToPoint = function(point) {
     //this.control({'button': 'left'});
 };
 
-BotSocket.prototype.getDesirablePoint = function() {
+BotSocket.prototype.getDesiredPoint = function() {
     var point = [];
     var H = Object.keys(this.battleground[0]).length - 1;
     var W = Object.keys(this.battleground).length - 1;
@@ -203,17 +218,22 @@ var steps = this.game.moveStepSize;
   // 2. Wave expansion
   do {
     stop = true;
-    for ( x = 0; x < W; ++x ) {
-      for ( y = 0; y < H; ++y ) {
+    for ( x = 1; x < W - 1; ++x ) {
+      for ( y = 1; y < H - 1; ++y ) {
         if ( grid[x][y] == d ) {
             for ( k = 0; k < 4; k++ ) {
-                if ( grid[x + dx[k]][y + dy[k]] === this.BG_EMPTY ) {
-                    stop = false;
-                    grid[x + dx[k]][y + dy[k]] = d + 1;
+
+                try {
+                    if ( grid[x + dx[k]][y + dy[k]] === this.BG_EMPTY ) {
+                        stop = false;
+                        grid[x + dx[k]][y + dy[k]] = d + 1;
                     }
+                } catch (e) {
+                    console.log(x + dx[k]);
                 }
             }
         }
+      }
     }
     d++;
   } while ( !stop && grid[bx][by] === this.BG_EMPTY );

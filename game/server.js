@@ -115,7 +115,7 @@ GameServer.prototype.addBotRoom = function() {
     this.rooms[room.id] = room;
 
     var botModule = require('./BotSocket');
-    for (var i=0; i<1; i++) {
+    for (var i=0; i<3; i++) {
         var botSocket = new botModule.BotSocket(room.game);
         room.sockets[botSocket.id] = botSocket;
         botSocket.start();
