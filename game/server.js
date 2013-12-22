@@ -43,6 +43,17 @@ GameServer.prototype.start = function() {
             }
         });
 
+        var pingStartTime;
+        socket.on('ping', function(data){
+            if (data.step === 'request') {
+                pingStartTime = new Date().getTime();
+                socket.emit('state', {'state': 'ping-need-response'});
+            } else if (data.step === 'response') {
+                var latency = new Date().getTime() - pingStartTime;
+                socket.emit('state', {'state': 'ping', 'latency': latency});
+            }
+        });
+
         _this.moveSocketToRoom(socket, defaultRoom);
         _this.updateRoomsClients();
     });

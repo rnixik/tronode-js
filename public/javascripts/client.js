@@ -18,6 +18,7 @@ var keyLeft = 37;
 var keyA = 65;
 
 var moveStepSize = 10;
+var serverMainLoopInterval = 70;
 
 var wsAdress = 'http://' + document.location.hostname + ':3000';
 
@@ -97,6 +98,10 @@ socket.on('state', function(data) {
         }
     } else if (data.state === 'no-slot') {
         alert('There are not slots in this room. Create your own room.');
+    } else if (data.state === 'ping-need-response') {
+        socket.emit('ping', {'step': 'response'});
+    } else if (data.state === 'ping') {
+        //nothing to do with data.latency
     }
 
 });
@@ -121,6 +126,7 @@ function sendStateToBot(data) {
             'gameWidth': gameWidth,
             'gameHeight': gameHeight,
             'moveStepSize': moveStepSize,
+            'mainLoopInterval': serverMainLoopInterval,
             'socket': socket
         });
         window.botSocket = botSocket;

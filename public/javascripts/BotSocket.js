@@ -11,6 +11,7 @@ function BotSocket(gameParameters) {
     this.moveStepSize = gameParameters.moveStepSize;
     this.gameWidth = gameParameters.gameWidth;
     this.gameHeight = gameParameters.gameHeight;
+    this.serverMainLoopInterval = gameParameters.mainLoopInterval;
     
 
     this.id = 'bot-' + Math.floor((1 + Math.random()) * 0x10000);
@@ -31,6 +32,7 @@ function BotSocket(gameParameters) {
 
     this.latencyMultiplier = 1;
     this.nextBikeDirection = null;
+    this.latency = null;
 }
 
 BotSocket.prototype.emit = function(event, data) {
@@ -68,6 +70,10 @@ BotSocket.prototype.emit = function(event, data) {
                 this.occupy(bike.x, bike.y);
             }
         break;
+        case 'ping':
+            this.latency = data.latency;
+            this.latencyMultiplier = Math.floor(this.latency / this.serverMainLoopInterval) + 1;
+        break;
         case 'update':
             var prevX = null;
             var prevY = null;
@@ -95,9 +101,16 @@ BotSocket.prototype.emit = function(event, data) {
                 this.update();
             }
 
+            if (this.clientSocket) {
+                this.updateLatancy();
+            }
         break;
     }
 };
+
+BotSocket.prototype.updateLatancy = function(){
+    this.clientSocket.emit('ping', {'step': 'request'});
+}
 
 BotSocket.prototype.control = function(data) {
     if (this.game) {
