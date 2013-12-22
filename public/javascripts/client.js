@@ -120,6 +120,7 @@ function sendStateToBot(data) {
     if (!botRoom) {
         return;
     }
+    return;
 
     if (!botSocket) {
         botSocket = new BotSocket({
