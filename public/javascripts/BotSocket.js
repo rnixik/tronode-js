@@ -29,7 +29,8 @@ function BotSocket(gameParameters) {
     this.desiredPoint = null;
     this.updDestinationInterval = 5;
 
-    
+    this.latencyMultiplier = 1;
+    this.nextBikeDirection = null;
 }
 
 BotSocket.prototype.emit = function(event, data) {
@@ -49,6 +50,8 @@ BotSocket.prototype.emit = function(event, data) {
         break;
         case 'restart':
             this.movements = 0;
+            this.nextBikeDirection = null;
+            this.desiredPoint = null;
             this.initializeBattleground();
 
             var myBikeNumber = null;
@@ -82,6 +85,8 @@ BotSocket.prototype.emit = function(event, data) {
                             this.myBike = bike;
                         }
                         this.occupy(bike.x, bike.y);
+                        var prediction = this.getPrediction(bike.x, bike.y, bike.direction);
+                        this.occupy(prediction[0], prediction[1]);
                     }
                 }
             }
@@ -100,6 +105,39 @@ BotSocket.prototype.control = function(data) {
     } else {
         this.clientSocket.emit('control', data);
     }
+
+    if (data.button === 'right') {
+        switch (this.myBike.direction) {
+        case "r":
+            this.nextBikeDirection = "d";
+            break;
+        case "d":
+            this.nextBikeDirection = "l";
+            break;
+        case "l":
+            this.nextBikeDirection = "u";
+            break;
+        case "u":
+            this.nextBikeDirection = "r";
+            break;
+        }
+    } else if (data.button === 'left') {
+        switch (this.myBike.direction) {
+        case "r":
+            this.nextBikeDirection = "u";
+            break;
+        case "d":
+            this.nextBikeDirection = "r";
+            break;
+        case "l":
+            this.nextBikeDirection = "d";
+            break;
+        case "u":
+            this.nextBikeDirection = "l";
+            break;
+        }
+    }
+    
 };
 
 BotSocket.prototype.initializeBattleground = function() {
@@ -133,11 +171,19 @@ BotSocket.prototype.update = function() {
     if (!this.desiredPoint || this.movements % this.updDestinationInterval === 0) {
         this.desiredPoint = this.getDesiredPoint();
     }
-    destination = this.desiredPoint;
 
-    if (!destination) {
+    if ( Math.pow(this.desiredPoint[0] - this.myBike.x, 2) + Math.pow(this.desiredPoint[1] - this.myBike.y, 2) < Math.pow(this.moveStepSize * this.latencyMultiplier, 2)) {
+        this.desiredPoint = this.getDesiredPoint();
+        //console.log('update dest point');
+    }
+
+    if (!this.desiredPoint) {
         return;
     }
+
+    destination = this.adjustPositionWithLatency(this.desiredPoint[0], this.desiredPoint[1]);
+
+    
 
     var currentPoint = [this.myBike.x, this.myBike.y];
     var path = this.algorithmLee(currentPoint, destination);
@@ -149,12 +195,58 @@ BotSocket.prototype.update = function() {
     }
 };
 
+BotSocket.prototype.getPrediction = function(x, y, direction) {
+    var dirVector = [0, 0];
+            switch (direction) {
+                case 'u':
+                    dirVector[1] = -1;
+                break;
+                case 'r':
+                    dirVector[0] = 1;
+                break;
+                case 'd':
+                    dirVector[1] = 1;
+                break;
+                case 'l':
+                    dirVector[0] = -1;
+                break;
+            }
+    var x = x + (this.latencyMultiplier - 1) * this.moveStepSize * dirVector[0];
+    var y = y + (this.latencyMultiplier - 1) * this.moveStepSize * dirVector[1];
+    return [x, y];
+}
+
+BotSocket.prototype.adjustPositionWithLatency = function(x, y) {
+    if (this.latencyMultiplier > 1) {
+        var steps = this.moveStepSize * this.latencyMultiplier;
+        x = Math.floor(x / steps) * steps;
+        y = Math.floor(y / steps) * steps;
+    }
+    return [x, y];
+};
+
 BotSocket.prototype.moveToPoint = function(point) {
+    
     var cx = this.myBike.x;
     var cy = this.myBike.y;
     var dir = this.myBike.direction;
+
     var dx = point[0];
     var dy = point[1];
+
+
+    if (this.latencyMultiplier > 1){
+        if (!this.nextBikeDirection) {
+            this.nextBikeDirection = dir;
+        } else {
+            dir = this.nextBikeDirection;
+        }
+
+        var prediction = this.getPrediction(cx, cy, this.nextBikeDirection);
+        cx = prediction[0];
+        cy = prediction[1];
+    }
+
 
     if ( (dx > cx && dir === 'u') || (dx < cx && dir === 'd') ) {
         this.control({'button': 'right'});
@@ -341,6 +433,7 @@ var steps = this.moveStepSize;
 
   if (grid[bx][by] === this.BG_EMPTY) {
     //not found
+    //console.log('not found');
     return false;
   }
 

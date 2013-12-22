@@ -41,6 +41,12 @@ Game.prototype.emit = function(event, data) {
     for (s in this.sockets){
         socket = this.sockets[s];
         socket.emit(event, data);
+        /*
+        setTimeout(function(){
+            socket.emit(event, data);
+        }, 150);
+        */
+        
     }
 };
 
