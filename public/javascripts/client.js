@@ -111,7 +111,7 @@ function sendStateToBot(data) {
     var botRoom = false;
     if (rooms && myRoomId) {
         for (var r in rooms) {
-            if (rooms[r].id === myRoomId 
+            if (rooms[r].id === myRoomId
                 && (rooms[r].name.toLowerCase() === 'bot test' || rooms[r].name.toLowerCase() === 'test bot')) {
                 botRoom = true;
             }
@@ -123,7 +123,8 @@ function sendStateToBot(data) {
     return;
 
     if (!botSocket) {
-        botSocket = new BotSocket({
+        botSocket = new BotSocket();
+        botSocket.setGameParameters({
             'gameWidth': gameWidth,
             'gameHeight': gameHeight,
             'moveStepSize': moveStepSize,
@@ -152,7 +153,7 @@ function sendStateToBot(data) {
             dp.style.left = botSocket.desiredPoint[0] + 'px';
             dp.style.top = botSocket.desiredPoint[1] + 'px';
         }
-        
+
     }
 }
 

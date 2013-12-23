@@ -1,18 +1,6 @@
-function BotSocket(gameParameters) {
+function BotSocket() {
   this.game = null;
   this.clientSocket = null;
-
-  if (typeof gameParameters.onControl === 'function') {
-    this.game = gameParameters;
-  } else {
-    this.clientSocket = gameParameters.socket;
-  }
-
-  this.moveStepSize = gameParameters.moveStepSize;
-  this.gameWidth = gameParameters.gameWidth;
-  this.gameHeight = gameParameters.gameHeight;
-  this.serverMainLoopInterval = gameParameters.mainLoopInterval;
-  
 
   this.id = 'bot-' + Math.floor((1 + Math.random()) * 0x10000);
 
@@ -31,6 +19,14 @@ function BotSocket(gameParameters) {
   this.updDestinationInterval = 5;
 }
 
+BotSocket.prototype.setGameObject = function(game) {
+  this.game = game;
+
+  this.moveStepSize = game.moveStepSize;
+  this.gameWidth = game.gameWidth;
+  this.gameHeight = game.gameHeight;
+  this.serverMainLoopInterval = game.mainLoopInterval;
+};
 
 
 /* ----- Block with states ----- */
@@ -107,7 +103,7 @@ BotSocket.prototype.onUpdate = function(data) {
     this.movements++;
     this.update();
   }
-}
+};
 
 
 /* ----- end of block with states ----- */
@@ -115,12 +111,7 @@ BotSocket.prototype.onUpdate = function(data) {
 
 
 BotSocket.prototype.control = function(data) {
-  if (this.game) {
-    this.game.onControl(this, data);
-  } else {
-    this.clientSocket.emit('control', data);
-  }
-  
+  this.game.onControl(this, data);
 };
 
 BotSocket.prototype.initializeBattleground = function() {
@@ -174,7 +165,7 @@ BotSocket.prototype.update = function() {
 };
 
 BotSocket.prototype.moveToPoint = function(point) {
-  
+
   var cx = this.myBike.x;
   var cy = this.myBike.y;
   var dir = this.myBike.direction;
@@ -204,7 +195,7 @@ BotSocket.prototype.getDesiredPointHeadhunter = function() {
   var dy = [0, 1, 0, -1];
   var i, k;
   var possibilies = [];
-  
+
 
   this.updDestinationInterval = 1;
 
@@ -231,13 +222,13 @@ BotSocket.prototype.getDesiredPointHeadhunter = function() {
 
       for (i=1; i<=3; i++) {
         var p = [
-          pos[0] + i * this.moveStepSize * dirVector[0], 
+          pos[0] + i * this.moveStepSize * dirVector[0],
           pos[1] + i * this.moveStepSize * dirVector[1]
         ];
         bikePossibilities.push(p);
         possibilies.push(p);
       }
-      
+
       var len = bikePossibilities.length;
       var possibility;
       for (i = 0; i < len; i++) {
@@ -254,8 +245,8 @@ BotSocket.prototype.getDesiredPointHeadhunter = function() {
 
   var filteredPossibilies = [];
   for (i in possibilies) {
-    if (typeof this.battleground[possibilies[i][0]] !== 'undefined' 
-      &&  typeof this.battleground[possibilies[i][0]][possibilies[i][1]] === 'number' 
+    if (typeof this.battleground[possibilies[i][0]] !== 'undefined'
+      &&  typeof this.battleground[possibilies[i][0]][possibilies[i][1]] === 'number'
       && this.battleground[possibilies[i][0]][possibilies[i][1]] === this.BG_EMPTY) {
       filteredPossibilies.push(possibilies[i]);
     }
@@ -265,7 +256,7 @@ BotSocket.prototype.getDesiredPointHeadhunter = function() {
     var index = this.getRandomInt(0, filteredPossibilies.length);
     return filteredPossibilies[index];
   }
-  
+
 };
 
 BotSocket.prototype.getDesiredPoint = function() {
@@ -275,9 +266,9 @@ BotSocket.prototype.getDesiredPoint = function() {
   if (point) {
     return point;
   }
-  
+
   this.updDestinationInterval = 80;
-  
+
   var H = Object.keys(this.battleground[0]).length - 1;
   var W = Object.keys(this.battleground).length - 1;
 
@@ -296,7 +287,7 @@ BotSocket.prototype.getDesiredPoint = function() {
     iter++;
   } while (!found && iter < 1000);
 
-  
+
   point = [x, y];
 
   return point;
