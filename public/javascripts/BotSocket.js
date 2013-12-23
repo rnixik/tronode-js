@@ -29,6 +29,11 @@ BotSocket.prototype.setGameObject = function(game) {
   this.serverMainLoopInterval = game.mainLoopInterval;
 };
 
+BotSocket.prototype.start = function() {
+  if (this.game) {
+    this.game.onControl(this, {'button': 'joinBattle', 'name': this.botName});
+  }
+};
 
 /* ----- Block with states ----- */
 
@@ -132,12 +137,6 @@ BotSocket.prototype.initializeBattleground = function() {
 
 BotSocket.prototype.occupy = function (x, y) {
   this.battleground[x][y] = this.BG_OCCUPIED;
-};
-
-BotSocket.prototype.start = function() {
-  if (this.game) {
-    this.game.onControl(this, {'button': 'joinBattle', 'name': this.botName});
-  }
 };
 
 BotSocket.prototype.update = function() {

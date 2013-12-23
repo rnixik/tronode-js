@@ -7,6 +7,14 @@ BotSocket.prototype.beforeStart = function() {
   this.updDestinationInterval = 120;
 };
 
+if (typeof origOnRestart === 'undefined') {
+  var origOnRestart = BotSocket.prototype.onRestart;
+  BotSocket.prototype.onRestart = function(data) {
+    origOnRestart.call(this, data);
+    console.log('ok');
+  };
+}
+
 BotSocket.prototype.update = function() {
   if (!this.desiredPoint || this.movements % this.updDestinationInterval === 0) {
     this.desiredPoint = this.getDesiredPoint();

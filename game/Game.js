@@ -118,10 +118,11 @@ Game.prototype.initializePlayer = function(slot, socket, name) {
             bike.y = slot.pos[1];
             bike.direction = slot.direction;
             bike.name = this.utils.removeTags(name);
-            bike.collided = true;
             bike.setOnCollideCallback(function(){
                 _this.onBikeCollided(bike);
             });
+
+            bike.collide();
 
 
             socket.emit('state', {
