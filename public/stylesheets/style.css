@@ -93,3 +93,11 @@ a {
 .join-room-container .room-option-checked {
   font-weight: bold;
 }
+.custom-bot-container .custom-ai-url {
+  width: 220px;
+}
+.custom-bot-container .bot-room-control-toggler {
+  color: #008080;
+  border-bottom: 1px dashed;
+  cursor: pointer;
+}

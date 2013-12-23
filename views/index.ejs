@@ -36,7 +36,7 @@
       </div>
 
     <p>
-      The game restarts every 5 seconds.
+      <em>Wait 5 seconds for reset.</em>
     </p>
 
 
@@ -58,9 +58,20 @@
         <button id="create-room-btn">Create room</button>
       </span>
 
-      <p style="display: none">
-        <button id="create-bot-test-room-btn">Create room for test your own bot</button>
-      </p>
+      <div class="custom-bot-container">
+        <p>
+          <span id="bot-room-control-toggler" class="bot-room-control-toggler">Show options for room with your own bot</span>
+        </p>
+        <div id="custom-bot-container-toggle" style="display: none">
+          <p>
+            <button id="create-bot-test-room-btn">Create room for test your own bot</button>
+            <button id="add-bot-btn">Add server-side bot</button>
+          </p>
+          <p>
+            <input type="text" id="custom-ai-url" placeholder="http://something.com/my-ai.js" class="custom-ai-url"><button id="load-url-btn">Load your AI script</button>
+          </p>
+        </div>
+      </div>
     </div>
 
 

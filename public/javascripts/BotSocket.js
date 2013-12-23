@@ -3,6 +3,7 @@ function BotSocket() {
   this.clientSocket = null;
 
   this.id = 'bot-' + Math.floor((1 + Math.random()) * 0x10000);
+  this.isBot = true;
 
   this.myBike = null;
   this.bikes = [];
@@ -51,7 +52,7 @@ BotSocket.prototype.onAddBike = function(data) {
 
 BotSocket.prototype.onNewPlayer = function(data) {
   this.bikes.push(data.bike);
-  this.occupy(data.bike.x, this.myBike.y);
+  this.occupy(data.bike.x, data.bike.y);
 };
 
 BotSocket.prototype.onRestart = function(data) {
@@ -140,13 +141,7 @@ BotSocket.prototype.start = function() {
 };
 
 BotSocket.prototype.update = function() {
-  var destination;
-  var updDestinationInterval = 1;
   if (!this.desiredPoint || this.movements % this.updDestinationInterval === 0) {
-    this.desiredPoint = this.getDesiredPoint();
-  }
-
-  if ( Math.pow(this.desiredPoint[0] - this.myBike.x, 2) + Math.pow(this.desiredPoint[1] - this.myBike.y, 2) < Math.pow(this.moveStepSize, 2)) {
     this.desiredPoint = this.getDesiredPoint();
   }
 

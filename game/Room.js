@@ -4,7 +4,11 @@ function Room(ownerSocket, name) {
         this.id = ownerSocket.id.substring(0, 12);
     }
     this.name = name;
+    this.withBots = 0;
 
+    if (/^test bot|bot test/i.test(this.name)){
+        this.withBots = 1;
+    }
 
     this.sockets = {};
     this.bikes = {};
@@ -27,7 +31,14 @@ Room.prototype.getData = function() {
         var bike = this.bikes[b];
         data.bikes[bike.number] = bike.getData();
     }
-    data.socketsNum = Object.keys(this.sockets).length;
+    data.socketsNum = 0;
+    for (var s in this.sockets) {
+        if (typeof this.sockets[s].isBot === 'undefined') {
+            data.socketsNum++;
+        }
+    }
+
+    data.withBots = this.withBots;
 
     return data;
 };

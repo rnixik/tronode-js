@@ -17,22 +17,31 @@ GameServer.prototype.start = function() {
 
     socket.emit('state', {'state': 'connected'});
 
-    socket.on('control', function(data){
-      if (data.button === 'create-room') {
-        var room = _this.addRoom(socket, data.name);
-        _this.moveSocketToRoom(socket, room);
-        _this.updateRoomsClients();
-      } else if (data.button === 'join-room'){
-        var room = _this.rooms[data.roomId];
-        if (room){
+    socket.on('control', function(data) {
+      try {
+        if (data.button === 'create-room') {
+          var room = _this.addRoom(socket, data.name);
           _this.moveSocketToRoom(socket, room);
           _this.updateRoomsClients();
+        } else if (data.button === 'join-room'){
+          var room = _this.rooms[data.roomId];
+          if (room){
+            _this.moveSocketToRoom(socket, room);
+            _this.updateRoomsClients();
+          }
+        } else if (data.button === 'add-bot'){
+          var room = _this.getRoomWithSocketId(socket.id);
+          if (room && room.withBots && room.id !== 'bot'){
+            _this.addBots(room, 1);
+          }
+        } else {
+          var room = _this.getRoomWithSocketId(socket.id);
+          if (room){
+            room.game.onControl(socket, data);
+          }
         }
-      } else {
-        var room = _this.getRoomWithSocketId(socket.id);
-        if (room){
-          room.game.onControl(socket, data);
-        }
+      } catch (e) {
+        console.log(e);
       }
     });
 
@@ -66,7 +75,7 @@ GameServer.prototype.start = function() {
 GameServer.prototype.cleanRooms = function() {
   var r, room;
   for (r in this.rooms){
-    if (r === 'default') {
+    if (r === 'default' || r === 'bot') {
       continue;
     }
     if (this.rooms[r].getData().socketsNum === 0) {
@@ -108,11 +117,6 @@ GameServer.prototype.addRoom = function(ownerSocket, name) {
   var room = new this.roomModule.Room(ownerSocket, this.utils.removeTags(name));
   room.startGame();
   this.rooms[room.id] = room;
-
-  if (name.toLowerCase() === 'test bot' || name.toLowerCase() === 'bot test') {
-    this.addBots(room, 4);
-  }
-
   this.updateRoomsClients();
   return room;
 };
@@ -129,6 +133,7 @@ GameServer.prototype.addBotRoom = function() {
   var room = new this.roomModule.Room(null, 'With bots');
   room.id = 'bot';
   room.startGame();
+  room.withBots = 1;
   this.rooms[room.id] = room;
 
   this.addBots(room, 3);

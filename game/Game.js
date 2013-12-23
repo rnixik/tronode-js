@@ -46,7 +46,7 @@ Game.prototype.emit = function(event, data) {
             socket.emit(event, data);
         }, 150);
         */
-        
+
     }
 };
 
@@ -78,6 +78,8 @@ Game.prototype.onControl = function(socket, data) {
                 } else if (data.button === 'start') {
                     this.gameStarted = true;
                     this.updateClients();
+                } else if (data.button === 'leave') {
+                    this.onLeave(socket);
                 }
             }
 };
@@ -116,6 +118,7 @@ Game.prototype.initializePlayer = function(slot, socket, name) {
             bike.y = slot.pos[1];
             bike.direction = slot.direction;
             bike.name = this.utils.removeTags(name);
+            bike.collided = true;
             bike.setOnCollideCallback(function(){
                 _this.onBikeCollided(bike);
             });
