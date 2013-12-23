@@ -8,7 +8,7 @@ var routes = require('./routes');
 var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
-var ejs = require('ejs'); ejs.open = '{{'; ejs.close = '}}';
+var ejs = require('ejs'); ejs.open = '<?'; ejs.close = '?>';
 
 var app = express();
 
