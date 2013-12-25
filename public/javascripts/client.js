@@ -160,6 +160,7 @@ function startGame() {
    document.getElementById('bot-room-control-toggler').onclick = toggleBotControl;
 
    checkMobile();
+   body.className = '';
 }
 
 function joinRoom() {
