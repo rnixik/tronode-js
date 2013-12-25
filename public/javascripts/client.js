@@ -159,6 +159,7 @@ function startGame() {
    document.getElementById('load-url-btn').onclick = loadAiScriptUrl;
    document.getElementById('bot-room-control-toggler').onclick = toggleBotControl;
 
+   checkMobile();
 }
 
 function joinRoom() {
@@ -240,4 +241,29 @@ function bindEvents(container) {
 
       }
    };
+}
+
+function checkMobile() {
+  if( !(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) ) {
+    return;
+  }
+  var mobileControllerContainer = document.getElementById('mobile-controller-container');
+  var wrapper = document.getElementById('game-container').parentNode;
+  wrapper.appendChild(mobileControllerContainer);
+  mobileControllerContainer.style.width = (wrapper.offsetWidth - 2) + 'px';
+
+  document.getElementById('mobile-left-btn').onclick = function() {
+    if (myBike) {
+      myBike.turnLeft();
+      socket.emit('control', {'button': 'left'});
+    }
+  };
+  document.getElementById('mobile-right-btn').onclick = function() {
+    if (myBike) {
+      myBike.turnRight();
+      socket.emit('control', {'button': 'right'});
+    }
+  };
+
+  mobileControllerContainer.style.display = 'block';
 }
