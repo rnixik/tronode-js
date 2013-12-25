@@ -6,3 +6,4 @@ nbproject
 \.chg\..*$
 \.rej$
 \.conflict\~$
+\.git
