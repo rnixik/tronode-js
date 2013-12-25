@@ -1,5 +1,6 @@
 BotSocket.prototype.onPing = function(data) {
-  // nothing to do with data.latency;
+  this.latencyMultiplier = Math.floor(data.latency / this.serverMainLoopInterval) + 1;
+  console.log('latency = ' + data.latency, 'latencyMultiplier = ' + this.latencyMultiplier);
 };
 
 BotSocket.prototype.beforeStart = function() {
@@ -8,6 +9,8 @@ BotSocket.prototype.beforeStart = function() {
 
   this.latencyMultiplier = 2;
   this.nextBikeDirection = null;
+
+  this.clientSocket.emit('ping', {'step': 'request'});
 };
 
 if (typeof origOnRestart === 'undefined') {
@@ -15,6 +18,7 @@ if (typeof origOnRestart === 'undefined') {
   BotSocket.prototype.onRestart = function(data) {
     origOnRestart.call(this, data);
     this.nextBikeDirection = null;
+    this.clientSocket.emit('ping', {'step': 'request'});
   };
 }
 
@@ -96,6 +100,9 @@ BotSocket.prototype.update = function() {
   }
 
   var currentPoint = [this.myBike.x, this.myBike.y];
+  if (this.latencyMultiplier > 1 && this.nextBikeDirection) {
+    currentPoint = this.getPrediction(currentPoint[0], currentPoint[1], this.nextBikeDirection);
+  }
 
   var path = this.algorithmLee(currentPoint, this.desiredPoint);
 

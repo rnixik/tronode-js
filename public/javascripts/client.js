@@ -20,7 +20,12 @@ var keyA = 65;
 var moveStepSize = 10;
 var serverMainLoopInterval = 70;
 
-var wsAdress = 'http://' + document.location.hostname + ':3000';
+if (/heroku/.test(document.location.hostname)) {
+  var wsAdress = location.origin.replace(/^http/, 'ws');
+} else {
+  // var port comes from server
+  var wsAdress = 'http://' + document.location.hostname + ':' + port;
+}
 
 var socket = io.connect(wsAdress);
 socket.on('state', function(data) {

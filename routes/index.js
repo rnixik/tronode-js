@@ -5,5 +5,6 @@
 
 exports.index = function(req, res){
   var env = req.app.get('env');
-  res.render('index', { title: 'Express', 'env': env });
+  var port = req.app.get('port');
+  res.render('index', { title: 'Express', 'env': env, 'port': port });
 };

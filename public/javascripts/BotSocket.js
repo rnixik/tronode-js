@@ -107,7 +107,11 @@ BotSocket.prototype.onUpdate = function(data) {
   }
   if ( this.myBike && !this.myBike.collided && (prevX !== this.myBike.x || prevY !== this.myBike.y) ) {
     this.movements++;
-    this.update();
+    try {
+      this.update();
+    } catch (e) {
+      console.log(e);
+    }
   }
 };
 

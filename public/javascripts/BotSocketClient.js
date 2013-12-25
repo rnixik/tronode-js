@@ -22,6 +22,7 @@ BotSocket.prototype.onPing = function(data) {
 
 BotSocket.prototype.beforeStart = function() {
   this.botName = 'My AI';
+  this.clientSocket.emit('ping', {'step': 'request'});
 };
 
 BotSocket.loadScript = function(url, callback) {
