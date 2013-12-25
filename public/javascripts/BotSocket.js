@@ -279,7 +279,7 @@ BotSocket.prototype.getDesiredPoint = function() {
       found = true;
     }
     iter++;
-  } while (!found && iter < 1000);
+  } while (!found && iter < 100);
 
 
   point = [x, y];
