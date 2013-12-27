@@ -140,5 +140,5 @@ body.loading .loading-message {
   font-size: 36px;
 }
 .loading-message {
-  display: none;
+  opacity: 0;
 }

@@ -134,8 +134,14 @@ function sendStateToBot(data) {
       }
    }
 
-   if (botSocket && botRoom) {
-      botSocket.emit('state', data);
+   if (!botRoom) {
+    return;
+   }
+
+   if (botSocket) {
+     botSocket.emit('state', data);
+   } else {
+     initializeBotSocket();
    }
 }
 

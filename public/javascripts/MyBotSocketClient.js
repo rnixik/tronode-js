@@ -264,14 +264,16 @@ BotSocket.prototype.debugDesiredPoint = function() {
       this.dpDebug.style.position = 'absolute';
       this.dpDebug.style.width = '5px';
       this.dpDebug.style.height = '5px';
+      this.dpDebug.style.color = 'red';
+      this.dpDebug.style.fontSize = '22px';
       this.dpDebug.id = 'dp';
       this.dpDebug.innerHTML = 'X';
       gameContainer.appendChild(this.dpDebug);
     }
 
   if (this.desiredPoint){
-    this.dpDebug.style.left = this.desiredPoint[0] + 'px';
-    this.dpDebug.style.top = this.desiredPoint[1] + 'px';
+    this.dpDebug.style.left = (this.desiredPoint[0] - 4) + 'px';
+    this.dpDebug.style.top = (this.desiredPoint[1] - 4) + 'px';
   }
 };
 
