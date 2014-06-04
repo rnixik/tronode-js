@@ -141,7 +141,7 @@ function sendStateToBot(data) {
    if (botSocket) {
      botSocket.emit('state', data);
    } else {
-     initializeBotSocket();
+     //initializeBotSocket();
    }
 }
 
