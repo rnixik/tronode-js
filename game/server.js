@@ -10,7 +10,7 @@ function GameServer(sockets){
 
 GameServer.prototype.start = function() {
   var defaultRoom = this.addDefaultRoom();
-  this.addBotRoom();
+  // this.addBotRoom();
   var _this = this;
 
   this.sockets.on('connection', function (socket) {
