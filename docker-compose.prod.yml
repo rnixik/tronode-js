@@ -6,8 +6,6 @@ services:
     networks:
       - nginx-proxy
     restart: always
-    ports:
-      - 3000:3000
     environment:
       HTTPS_METHOD: "noredirect"
       VIRTUAL_HOST: "tronode.getid.org"
