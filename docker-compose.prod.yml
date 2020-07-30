@@ -7,7 +7,6 @@ services:
       - nginx-proxy
     restart: always
     environment:
-      HTTPS_METHOD: "noredirect"
       VIRTUAL_HOST: "tronode.getid.org"
       LETSENCRYPT_HOST: "tronode.getid.org"
 
