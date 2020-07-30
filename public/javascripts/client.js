@@ -24,7 +24,7 @@ if (/heroku/.test(document.location.hostname)) {
   var wsAdress = location.origin.replace(/^http/, 'ws');
 } else {
   // var port comes from server
-  var wsAdress = 'http://' + document.location.hostname + ':' + port;
+  var wsAdress = 'wss://' + document.location.hostname;
 }
 
 var socket = io.connect(wsAdress);
