@@ -179,6 +179,14 @@ Bike.prototype.turnLeft = function() {
     this.makeTurn = true;
 };
 
+Bike.prototype.turn = function(direction) {
+    if (this.collided){
+        return;
+    }
+    this.direction = direction;
+    this.makeTurn = true;
+};
+
 Bike.prototype.collide = function() {
     this.direction = null;
     this.collided = true;

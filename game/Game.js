@@ -69,10 +69,16 @@ Game.prototype.onControl = function(socket, data) {
                     socket.emit('state', {'state': 'no-slot'});
                 }
             } else if (bike) {
-                if (data.button === 'right') {
+                if (data.button && ['u', 'r', 'd', 'l'].indexOf(data.button) > -1) {
+                    // Control with 4 keys
+                    bike.turn(data.button);
+                    this.updateClients();
+                } else if (data.button === 'right') {
+                    // Control with 2 keys
                     bike.turnRight();
                     this.updateClients();
                 } else if (data.button === 'left') {
+                    // Control with 2 keys
                     bike.turnLeft();
                     this.updateClients();
                 } else if (data.button === 'start') {

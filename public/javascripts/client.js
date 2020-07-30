@@ -16,6 +16,7 @@ var keyDown = 40;
 var keyS = 83;
 var keyLeft = 37;
 var keyA = 65;
+var controlWith4Keys = false;
 
 var moveStepSize = 10;
 var serverMainLoopInterval = 70;
@@ -160,6 +161,7 @@ function startGame() {
    document.getElementById('add-bot-btn').onclick = addServerBot;
    document.getElementById('load-url-btn').onclick = loadAiScriptUrl;
    document.getElementById('bot-room-control-toggler').onclick = toggleBotControl;
+   document.getElementById('control4keys').onclick = toggleControl4Keys;
 
    checkMobile();
    body.className = '';
@@ -210,6 +212,10 @@ function toggleBotControl() {
   }
 }
 
+function toggleControl4Keys() {
+    controlWith4Keys = document.getElementById('control4keys').checked;
+}
+
 function join() {
    var joinName = document.getElementById('join-name').value;
    if (joinName) {
@@ -227,21 +233,38 @@ function bindEvents(container) {
       switch (e.keyCode) {
         case keyUp:
         case keyW:
-           break;
+            if (controlWith4Keys) {
+                myBike.turn('u');
+                socket.emit('control', {'button': 'u'});
+            }
+            break;
         case keyRight:
         case keyD:
-           myBike.turnRight();
-           socket.emit('control', {'button': 'right'});
-           break;
+            if (controlWith4Keys) {
+                myBike.turn('r');
+                socket.emit('control', {'button': 'r'});
+            } else {
+                myBike.turnRight();
+                socket.emit('control', {'button': 'right'});
+            }
+            break;
         case keyDown:
         case keyS:
-           break;
+            if (controlWith4Keys) {
+                myBike.turn('d');
+                socket.emit('control', {'button': 'd'});
+            }
+            break;
         case keyLeft:
         case keyA:
-           myBike.turnLeft();
-           socket.emit('control', {'button': 'left'});
-           break;
-
+            if (controlWith4Keys) {
+                myBike.turn('l');
+                socket.emit('control', {'button': 'l'});
+            } else {
+                myBike.turnLeft();
+                socket.emit('control', {'button': 'left'});
+            }
+            break;
       }
    };
 }
