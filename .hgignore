@@ -1,9 +1,0 @@
-syntax: regexp
-node_modules
-nbproject
-\.orig\..*$
-\.orig$
-\.chg\..*$
-\.rej$
-\.conflict\~$
-\.git
